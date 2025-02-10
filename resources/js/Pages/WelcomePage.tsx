@@ -1,9 +1,19 @@
+import { Hero } from '@/components/Hero';
+import { Benefits } from '@/components/Benefits';
+import { HowItWorks } from '@/components/HowItWorks';
+import { Services } from '@/components/Services';
+import { Pricing } from '@/components/Pricing';
+import { ContactForm } from '@/components/ContactForm';
+
 export default function WelcomePage() {
   return (
-    <div>
-      <h1>Welcome</h1>
-
-      <p>This is a welcome page</p>
+    <div className="min-h-screen bg-white">
+      <Hero />
+      <Benefits />
+      <HowItWorks />
+      <Services />
+      {/* <Pricing /> */}
+      <ContactForm />
     </div>
   );
 }

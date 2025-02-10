@@ -5,10 +5,9 @@ namespace App\Console\Commands;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\SubscriptionStatusEnum;
 use App\Jobs\SendSubscriptionReminderEmail;
-use App\Models\Subscription;
 use App\Models\Payment;
+use App\Models\Subscription;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 
 class ProcessSubscriptionReminders extends Command
 {
@@ -42,6 +41,7 @@ class ProcessSubscriptionReminders extends Command
 
         if ($subscriptions->isEmpty()) {
             $this->info('No hay suscripciones que requieran recordatorio.');
+
             return;
         }
 
@@ -52,7 +52,7 @@ class ProcessSubscriptionReminders extends Command
                 ->whereBetween('due_date', [$today, $sevenDaysLater])
                 ->exists();
 
-            if (!$existingPayment) {
+            if (! $existingPayment) {
                 $payment = Payment::create([
                     'subscription_id' => $subscription->id,
                     'status' => PaymentStatusEnum::Pending,

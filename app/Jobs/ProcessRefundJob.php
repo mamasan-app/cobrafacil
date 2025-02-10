@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Transaction;
 use App\Models\Store;
+use App\Models\Transaction;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,7 +16,9 @@ class ProcessRefundJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $transaction;
+
     protected $montoVuelto;
+
     protected $store;
 
     public function __construct(Transaction $transaction, float $montoVuelto, Store $store)
@@ -28,7 +30,7 @@ class ProcessRefundJob implements ShouldQueue
 
     public function handle()
     {
-        if (!$this->store->bank_account_default) {
+        if (! $this->store->bank_account_default) {
             return;
         }
 
@@ -38,18 +40,18 @@ class ProcessRefundJob implements ShouldQueue
             'Content-Type' => 'application/json',
             'Authorization' => hash_hmac(
                 'sha256',
-                $bankAccount->telefono . $this->montoVuelto . $bankAccount->banco . $bankAccount->cedula,
+                $bankAccount->telefono.$this->montoVuelto.$bankAccount->banco.$bankAccount->cedula,
                 config('banking.commerce_token')
             ),
             'Commerce' => config('banking.commerce_id'),
         ])->post(config('banking.vuelto_url'), [
-                    'TelefonoDestino' => $bankAccount->telefono,
-                    'Cedula' => $bankAccount->cedula,
-                    'Banco' => $bankAccount->banco,
-                    'Monto' => number_format($this->montoVuelto, 2, '.', ''),
-                    'Concepto' => 'Vuelto',
-                    'Ip' => request()->ip(),
-                ]);
+            'TelefonoDestino' => $bankAccount->telefono,
+            'Cedula' => $bankAccount->cedula,
+            'Banco' => $bankAccount->banco,
+            'Monto' => number_format($this->montoVuelto, 2, '.', ''),
+            'Concepto' => 'Vuelto',
+            'Ip' => request()->ip(),
+        ]);
 
         if ($response->successful()) {
             Transaction::create([
