@@ -18,6 +18,7 @@ class Payment extends Model
         'due_date',
         'paid_date',
         'is_bs', // Nueva columna para indicar si el pago es en bolívares
+        'charged',
     ];
 
     protected $casts = [
@@ -25,6 +26,7 @@ class Payment extends Model
         'due_date' => 'date',
         'paid_date' => 'date',
         'is_bs' => 'boolean', // Cast automático a booleano
+        'charged' => 'boolean'
     ];
 
     /**
