@@ -373,7 +373,7 @@ class UserSubscriptionPayment extends Page
                     // Botón para registrar una nueva cuenta
                     Action::make('registerAccount')
                         ->label('Registrar cuenta y enviar')
-                        ->color('secondary')
+                        ->color('gray')
                         ->form([
                             Select::make('bank')
                                 ->label('Banco')
