@@ -60,8 +60,8 @@ class PaymentResource extends Resource
                         'Completado' => 'success',
                         'Pendiente' => 'warning',
                         'Fallido', 'Cancelado' => 'danger',
-                        'Incobrable' => 'secondary',
-                        default => 'secondary',
+                        'Incobrable' => 'gray',
+                        default => 'gray',
                     })
                     ->sortable(),
 

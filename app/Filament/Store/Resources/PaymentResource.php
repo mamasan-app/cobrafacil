@@ -6,6 +6,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Filament\Store\Resources\PaymentResource\Pages;
 use App\Models\Payment;
 use Filament\Facades\Filament;
+use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\Tabs\Tab;
@@ -15,7 +16,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms;
 
 class PaymentResource extends Resource
 {
@@ -59,7 +59,7 @@ class PaymentResource extends Resource
 
                 Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')
-                    ->getStateUsing(fn($record) => number_format($record->amount_cents / 100, 2) . ' USD')
+                    ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
                     ->sortable(),
 
                 Forms\Components\Toggle::make('charged')
@@ -68,14 +68,14 @@ class PaymentResource extends Resource
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
-                    ->getStateUsing(fn($record) => $record->status->getLabel())
+                    ->getStateUsing(fn ($record) => $record->status->getLabel())
                     ->badge()
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn ($state) => match ($state) {
                         'Completado' => 'success',
                         'Pendiente' => 'warning',
                         'Fallido', 'Cancelado' => 'danger',
-                        'Incobrable' => 'secondary',
-                        default => 'secondary',
+                        'Incobrable' => 'gray',
+                        default => 'gray',
                     })
                     ->sortable(),
 
@@ -87,13 +87,13 @@ class PaymentResource extends Resource
             ])
             ->filters([
                 Tables\Filters\Filter::make('Estado: Completado')
-                    ->query(fn($query) => $query->where('status', PaymentStatusEnum::Completed->value)),
+                    ->query(fn ($query) => $query->where('status', PaymentStatusEnum::Completed->value)),
 
                 Tables\Filters\Filter::make('Estado: Pendiente')
-                    ->query(fn($query) => $query->where('status', PaymentStatusEnum::Pending->value)),
+                    ->query(fn ($query) => $query->where('status', PaymentStatusEnum::Pending->value)),
 
                 Tables\Filters\Filter::make('Vencidos')
-                    ->query(fn($query) => $query->where('due_date', '<', now())->whereNull('paid_date')),
+                    ->query(fn ($query) => $query->where('due_date', '<', now())->whereNull('paid_date')),
             ])
             ->actions([
                 // Acciones personalizadas
@@ -117,12 +117,12 @@ class PaymentResource extends Resource
                                     ->placeholder('No disponible'),
                                 TextEntry::make('amount_cents')
                                     ->label('Monto')
-                                    ->getStateUsing(fn($record) => number_format($record->amount_cents / 100, 2) . ' USD')
+                                    ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
                                     ->placeholder('No disponible'),
                                 TextEntry::make('status')
                                     ->label('Estado')
                                     ->badge()
-                                    ->color(fn($record) => $record->status->getColor())
+                                    ->color(fn ($record) => $record->status->getColor())
                                     ->placeholder('No disponible'),
                                 TextEntry::make('paid_date')
                                     ->label('Fecha de Pago')
@@ -134,9 +134,9 @@ class PaymentResource extends Resource
                             ->schema([
                                 TextEntry::make('subscription.status')
                                     ->label('Estado')
-                                    ->getStateUsing(fn($record) => $record->status->getLabel())
+                                    ->getStateUsing(fn ($record) => $record->status->getLabel())
                                     ->badge()
-                                    ->color(fn($record) => $record->status->getColor()),
+                                    ->color(fn ($record) => $record->status->getColor()),
                                 TextEntry::make('subscription.trial_ends_at')
                                     ->label('Fin del Periodo de Prueba')
                                     ->dateTime()
@@ -195,7 +195,7 @@ class PaymentResource extends Resource
     {
         $currentStore = Filament::getTenant();
 
-        if (!$currentStore) {
+        if (! $currentStore) {
             // Si no hay tienda en sesión, devuelve una consulta vacía
             return Payment::query()->whereRaw('1 = 0');
         }

@@ -48,8 +48,8 @@ enum PaymentStatusEnum: string implements HasLabel
             self::Pending => 'warning',
             self::Completed => 'success',
             self::Failed, self::Cancelled => 'danger',
-            self::Uncollectible => 'secondary',
-            default => 'secondary',
+            self::Uncollectible => 'gray',
+            default => 'gray',
         };
     }
 }

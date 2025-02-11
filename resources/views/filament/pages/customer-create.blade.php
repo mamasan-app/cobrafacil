@@ -17,7 +17,7 @@
 
         <!-- Botón adicional para reiniciar -->
         <div class="mt-4">
-            <x-filament::button type="button" wire:click="resetForm" color="secondary">
+            <x-filament::button type="button" wire:click="resetForm" color="gray">
                 Reiniciar
             </x-filament::button>
         </div>
