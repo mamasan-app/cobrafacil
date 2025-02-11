@@ -1,69 +1,63 @@
 <x-filament::page>
-    <div class="space-y-6">
+  <div class="space-y-6">
+    <x-filament::section>
+      <x-slot name="heading">
+        Información de la Suscripción
+      </x-slot>
 
-        <!-- Contenedores de Detalles -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Detalles de la Suscripción -->
-            <div class="p-6 bg-blue-900 bg-opacity-50 rounded-lg">
-                <h3 class="text-xl font-bold text-white mb-4">Información de la Suscripción</h3>
-                <ul class="space-y-2">
-                    <li>
-                        <span class="font-semibold text-white">Estado:</span>
-                        <span class="text-white">
-                            {{ $subscription->status ? ucfirst(str_replace('_', ' ', $subscription->status->value)) : 'Estado no disponible' }}
-                        </span>
-                    </li>
-                    <li>
-                        <span class="font-semibold text-white">Fin del Período de Prueba:</span>
-                        <span class="text-white">
-                            {{ $subscription->trial_ends_at ? $subscription->trial_ends_at->format('d/m/Y') : 'No disponible' }}
-                        </span>
-                    </li>
-                    <li>
-                        <span class="font-semibold text-white">Fecha de Expiración:</span>
-                        <span class="text-white">
-                            {{ $subscription->expires_at ? $subscription->expires_at->format('d/m/Y') : 'No disponible' }}
-                        </span>
-                    </li>
-                    <li>
-                        <span class="font-semibold text-white">Precio:</span>
-                        <span class="text-green-400 font-medium">
-                            {{ $subscription->formattedPrice() }}
-                        </span>
-                    </li>
-                </ul>
-            </div>
+      <ul class="space-y-2">
+        <li>
+          <span class="font-semibold">Estado:</span>
+          <span>
+            {{ $subscription->status ? ucfirst(str_replace('_', ' ', $subscription->status->value)) : 'Estado no disponible' }}
+          </span>
+        </li>
+        <li>
+          <span class="font-semibold">Fin del Período de Prueba:</span>
+          <span>
+            {{ $subscription->trial_ends_at ? $subscription->trial_ends_at->format('d/m/Y') : 'No disponible' }}
+          </span>
+        </li>
+        <li> <span class="font-semibold">Fecha de Expiración:</span>
+          <span>
+            {{ $subscription->expires_at ? $subscription->expires_at->format('d/m/Y') : 'No disponible' }}
+          </span>
+        </li>
+        <li> <span class="font-semibold">Precio:</span>
+          <span class="font-medium text-green-400">
+            {{ $subscription->formattedPrice() }}
+          </span>
+        </li>
+      </ul>
+    </x-filament::section>
 
-            <!-- Detalles del Servicio -->
-            <div class="p-6 bg-blue-900 bg-opacity-50 rounded-lg">
-                <h3 class="text-xl font-bold text-white mb-4">Información del Servicio</h3>
-                @if ($subscription)
-                    <ul class="space-y-2">
-                        <li>
-                            <span class="font-semibold text-white">Nombre del Servicio:</span>
-                            <span class="text-white">{{ $subscription->service_name }}</span>
-                        </li>
-                        <li>
-                            <span class="font-semibold text-white">Descripción:</span>
-                            <span class="text-white">{{ $subscription->service_description }}</span>
-                        </li>
-                        <li>
-                            <span class="font-semibold text-white">Precio:</span>
-                            <span class="text-green-400 font-medium">{{ $subscription->formattedPrice() }}</span>
-                        </li>
-                        <li>
-                            <span class="font-semibold text-white">Días Gratuitos:</span>
-                            <span class="text-white">{{ $subscription->service_free_days }} días</span>
-                        </li>
-                        <li>
-                            <span class="font-semibold text-white">Período de Gracia:</span>
-                            <span class="text-white">{{ $subscription->service_grace_period }} días</span>
-                        </li>
-                    </ul>
-                @else
-                    <p class="text-gray-400">No hay servicio disponible para esta suscripción.</p>
-                @endif
-            </div>
-        </div>
-    </div>
+    <x-filament::section>
+      <x-slot name="heading">
+        Información del Servicio
+      </x-slot>
+
+      @if ($subscription)
+        <ul class="space-y-2">
+          <li>
+            <span class="font-semibold">Nombre del Servicio:</span>
+            <span
+              class=">{{ $subscription->service_name }}</span> </li> <li> <span class="font-semibold">Descripción:</span>
+            <span
+              class=">{{ $subscription->service_description }}</span> </li> <li> <span class="font-semibold">Precio:</span>
+            <span class="font-medium text-green-400">{{ $subscription->formattedPrice() }}</span>
+          </li>
+          <li>
+            <span class="font-semibold">Días Gratuitos:</span>
+            <span>{{ $subscription->service_free_days }} días</span>
+          </li>
+          <li> <span class="font-semibold">Período
+              de Gracia:</span>
+            <span>{{ $subscription->service_grace_period }} días</span>
+          </li>
+        </ul>
+      @else
+        <p class="text-gray-400">No hay servicio disponible para esta suscripción.</p>
+      @endif
+    </x-filament::section>
+  </div>
 </x-filament::page>
