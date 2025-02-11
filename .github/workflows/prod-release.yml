@@ -1,0 +1,14 @@
+name: 'Production Release'
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  trigger-envoyer-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Envoyer Deployment
+        run: |
+          curl -X GET "https://envoyer.io/deploy/${{ secrets.ENVOYER_PROJECT_KEY }}?sha=${{ github.sha }}"
