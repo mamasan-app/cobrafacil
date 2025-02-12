@@ -26,7 +26,7 @@ class Payment extends Model
         'due_date' => 'date',
         'paid_date' => 'date',
         'is_bs' => 'boolean', // Cast automático a booleano
-        'charged' => 'boolean'
+        'charged' => 'boolean',
     ];
 
     /**
