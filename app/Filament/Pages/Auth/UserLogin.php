@@ -8,11 +8,11 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Notifications\Notification;
-use Filament\Pages\Auth\Login as BaseUserLogin;
+use Filament\Pages\Auth\Login as FilamentLogin;
 use MagicLink\Actions\LoginAction;
 use MagicLink\MagicLink;
 
-class UserLogin extends BaseUserLogin
+class UserLogin extends FilamentLogin
 {
     public function form(Form $form): Form
     {
