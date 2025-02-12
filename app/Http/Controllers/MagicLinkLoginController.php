@@ -31,13 +31,4 @@ class MagicLinkLoginController extends Controller
         // Aquí puedes enviar el enlace por correo, pero para pruebas solo devolvemos el enlace en el mensaje
         return back()->with('message', "Se ha enviado un enlace de acceso a tu correo: $url");
     }
-
-    /**
-     * Maneja la autenticación usando el enlace mágico.
-     */
-    public function loginWithMagicLink(Request $request)
-    {
-        // Laravel Magic Link maneja automáticamente la autenticación en este punto.
-        return redirect('/app/dashboard');
-    }
 }

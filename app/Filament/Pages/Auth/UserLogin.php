@@ -34,6 +34,7 @@ class UserLogin extends FilamentLogin
 
         $user = User::where('email', $data['email'])->first();
         $action = new LoginAction($user);
+        $action->response(fn () => redirect('/app'));
 
         $magicLinkUrl = MagicLink::create($action)->url;
 
