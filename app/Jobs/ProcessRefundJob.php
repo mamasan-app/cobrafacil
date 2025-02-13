@@ -4,8 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Payment;
 use App\Models\Store;
-use App\Models\Store;
-use App\Models\Transaction; // Importar el modelo Payment
+use App\Models\Transaction;
 use App\Notifications\RefundSuccessfulNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
