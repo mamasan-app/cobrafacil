@@ -31,11 +31,10 @@ class DevelopmentSeeder extends Seeder
         ]);
         $admin->assignRole('admin');
 
-        $owner = User::create([
+        $owner = User::factory()->create([
             'first_name' => 'owner',
             'last_name' => 'owner',
             'email' => 'store@cobrafacil.app',
-            'email_verified_at' => now(),
         ]);
         $owner->assignRole('owner_store');
 
@@ -43,9 +42,6 @@ class DevelopmentSeeder extends Seeder
             'first_name' => 'customer',
             'last_name' => 'customer',
             'email' => 'customer@cobrafacil.app',
-            'identity_document' => 'V-12260129',
-            'phone_number' => '04146634862',
-            'email_verified_at' => now(),
         ]);
         $customer->assignRole('customer');
 
@@ -53,7 +49,6 @@ class DevelopmentSeeder extends Seeder
             'first_name' => 'employee',
             'last_name' => 'employee',
             'email' => 'employee@cobrafacil.app',
-            'email_verified_at' => now(),
         ]);
         $employee->assignRole('employee');
         $employee->assignRole('customer');
