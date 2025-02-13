@@ -12,6 +12,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionResource extends Resource
 {
@@ -32,6 +33,10 @@ class TransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                Transaction::query()->where('from_type', 'App\\Models\\User')
+                    ->where('from_id', Auth::id()) // Filtrar por usuario en sesión
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -43,14 +48,14 @@ class TransactionResource extends Resource
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
-                    ->formatStateUsing(fn ($record) => $record->status->getLabel())
+                    ->formatStateUsing(fn($record) => $record->status->getLabel())
                     ->badge()
-                    ->color(fn ($record) => $record->status->getColor())
+                    ->color(fn($record) => $record->status->getColor())
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Monto (USD)')
-                    ->formatStateUsing(fn ($state) => number_format($state, 2).' USD')
+                    ->formatStateUsing(fn($state) => number_format($state, 2) . ' USD')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('date')
@@ -75,20 +80,20 @@ class TransactionResource extends Resource
                                     ->label('ID de Transacción'),
                                 TextEntry::make('type')
                                     ->label('Tipo de Transacción')
-                                    ->getStateUsing(fn ($record) => $record->type->getLabel()),
+                                    ->getStateUsing(fn($record) => $record->type->getLabel()),
                                 TextEntry::make('status')
                                     ->label('Estado')
                                     ->badge()
-                                    ->color(fn ($record) => $record->status->getColor()),
+                                    ->color(fn($record) => $record->status->getColor()),
                                 TextEntry::make('date')
                                     ->label('Fecha de Transacción')
                                     ->dateTime('d/m/Y'),
                                 TextEntry::make('amount')
                                     ->label('Monto (USD)')
-                                    ->getStateUsing(fn ($record) => number_format($record->amount, 2).' USD'),
+                                    ->getStateUsing(fn($record) => number_format($record->amount, 2) . ' USD'),
                                 TextEntry::make('from_user_name')
                                     ->label('Usuario (From)')
-                                    ->getStateUsing(fn ($record) => $record->from->name ?? 'No disponible'),
+                                    ->getStateUsing(fn($record) => $record->from->name ?? 'No disponible'),
                                 TextEntry::make('to_name')
                                     ->label('Destino (To)')
                                     ->getStateUsing(function ($record) {
@@ -111,21 +116,21 @@ class TransactionResource extends Resource
                                     return [
                                         TextEntry::make('mibanco_code')
                                             ->label('Código (MiBanco)')
-                                            ->getStateUsing(fn () => $metadata->code)
+                                            ->getStateUsing(fn() => $metadata->code)
                                             ->placeholder('No disponible'),
 
                                         TextEntry::make('mibanco_message')
                                             ->label('Mensaje (MiBanco)')
-                                            ->getStateUsing(fn () => $metadata->message)
+                                            ->getStateUsing(fn() => $metadata->message)
                                             ->placeholder('No disponible'),
 
                                         TextEntry::make('mibanco_reference')
                                             ->label('Referencia (MiBanco)')
-                                            ->getStateUsing(fn () => $metadata->reference)
+                                            ->getStateUsing(fn() => $metadata->reference)
                                             ->placeholder('No disponible'),
                                         TextEntry::make('mibanco_id')
                                             ->label('ID (MiBanco)')
-                                            ->getStateUsing(fn () => $metadata->id)
+                                            ->getStateUsing(fn() => $metadata->id)
                                             ->placeholder('No disponible'),
                                     ];
                                 }
@@ -134,7 +139,7 @@ class TransactionResource extends Resource
                                     TextEntry::make('metadata_details')
                                         ->label('Detalles de Metadata')
                                         ->placeholder('No disponible')
-                                        ->getStateUsing(fn () => 'No se pudo determinar el tipo de metadata.'),
+                                        ->getStateUsing(fn() => 'No se pudo determinar el tipo de metadata.'),
                                 ];
                             })
                             ->columns(2),
@@ -146,12 +151,12 @@ class TransactionResource extends Resource
                                     ->placeholder('No disponible'),
                                 TextEntry::make('amount_cents')
                                     ->label('Monto')
-                                    ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
+                                    ->getStateUsing(fn($record) => number_format($record->amount_cents / 100, 2) . ' USD')
                                     ->placeholder('No disponible'),
                                 TextEntry::make('status')
                                     ->label('Estado')
                                     ->badge()
-                                    ->color(fn ($record) => $record->status->getColor())
+                                    ->color(fn($record) => $record->status->getColor())
                                     ->placeholder('No disponible'),
                                 TextEntry::make('paid_date')
                                     ->label('Fecha de Pago')

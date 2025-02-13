@@ -18,7 +18,7 @@ class Payment extends Model
         'due_date',
         'paid_date',
         'is_bs', // Nueva columna para indicar si el pago es en bolívares
-        'charged',
+        'paid',
     ];
 
     protected $casts = [

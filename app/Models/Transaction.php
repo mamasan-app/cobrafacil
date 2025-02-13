@@ -32,6 +32,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
+        'to_id' => 'string',
         'type' => TransactionTypeEnum::class,
         'status' => TransactionStatusEnum::class,
         'date' => 'date',
@@ -67,7 +68,7 @@ class Transaction extends Model
      */
     public function store()
     {
-        return $this->belongsTo(Store::class, 'to_id')->where('to_type', Store::class);
+        return $this->belongsTo(Store::class, 'to_id');
     }
 
     /**
@@ -119,7 +120,7 @@ class Transaction extends Model
      */
     public function getMetadataAsObject()
     {
-        if (! isset($this->metadata) || ! is_array($this->metadata)) {
+        if (!isset($this->metadata) || !is_array($this->metadata)) {
             return null;
         }
 

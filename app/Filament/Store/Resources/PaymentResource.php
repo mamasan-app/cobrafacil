@@ -62,9 +62,9 @@ class PaymentResource extends Resource
                     ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
                     ->sortable(),
 
-                Forms\Components\Toggle::make('charged')
-                    ->label('Cobrado')
-                    ->required(),
+                Tables\Columns\IconColumn::make('paid')
+                    ->label('Pagado')
+                    ->boolean(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')

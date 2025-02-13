@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Notifications\Notifiable;
 
 class Store extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'stores';
 
@@ -119,8 +120,15 @@ class Store extends Model
      *
      * @return BankAccount|null
      */
-    public function getDefaultBankAccount()
+
+    public function defaultBankAccount(): ?BankAccount
     {
-        return $this->bankAccounts()->where('is_default', true)->first();
+        return $this->hasOne(BankAccount::class, 'store_id')->where('default_account', 1)->first();
+    }
+
+    // Método para obtener el email del propietario de la tienda
+    public function routeNotificationForMail($notification)
+    {
+        return $this->owner ? $this->owner->email : null;
     }
 }

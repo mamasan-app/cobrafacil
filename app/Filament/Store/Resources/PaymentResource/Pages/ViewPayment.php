@@ -4,6 +4,7 @@ namespace App\Filament\Store\Resources\PaymentResource\Pages;
 
 use App\Filament\Store\Resources\PaymentResource;
 use App\Filament\Store\Resources\PaymentResource\Widgets\TransactionsWidget;
+use App\Filament\Store\Resources\PaymentResource\Widgets\RefundTransactionsWidget;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewPayment extends ViewRecord
@@ -17,6 +18,7 @@ class ViewPayment extends ViewRecord
     {
         return [
             TransactionsWidget::class,
+            RefundTransactionsWidget::class,
         ];
     }
 }

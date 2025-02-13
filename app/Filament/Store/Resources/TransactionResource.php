@@ -53,14 +53,14 @@ class TransactionResource extends Resource
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
-                    ->formatStateUsing(fn ($record) => $record->status->getLabel())
+                    ->formatStateUsing(fn($record) => $record->status->getLabel())
                     ->badge()
-                    ->color(fn ($record) => $record->status->getColor())
+                    ->color(fn($record) => $record->status->getColor())
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')
-                    ->formatStateUsing(fn ($record) => '$'.number_format($record->amount / 100, 2)),
+                    ->formatStateUsing(fn($record) => '$' . number_format($record->amount / 100, 2)),
 
                 Tables\Columns\TextColumn::make('date')
                     ->label('Fecha')
@@ -90,20 +90,20 @@ class TransactionResource extends Resource
                                     ->label('ID de Transacción'),
                                 TextEntry::make('type')
                                     ->label('Tipo de Transacción')
-                                    ->getStateUsing(fn ($record) => $record->type->getLabel()),
+                                    ->getStateUsing(fn($record) => $record->type->getLabel()),
                                 TextEntry::make('status')
                                     ->label('Estado')
                                     ->badge()
-                                    ->color(fn ($record) => $record->status->getColor()),
+                                    ->color(fn($record) => $record->status->getColor()),
                                 TextEntry::make('date')
                                     ->label('Fecha de Transacción')
                                     ->dateTime('d/m/Y'),
                                 TextEntry::make('amount_cents')
                                     ->label('Monto (USD)')
-                                    ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD'),
+                                    ->getStateUsing(fn($record) => number_format($record->amount_cents / 100, 2) . ' USD'),
                                 TextEntry::make('from_user_name')
                                     ->label('Usuario (From)')
-                                    ->getStateUsing(fn ($record) => $record->from->name ?? 'No disponible'),
+                                    ->getStateUsing(fn($record) => $record->from->name ?? 'No disponible'),
                                 TextEntry::make('to_name')
                                     ->label('Destino (To)')
                                     ->getStateUsing(function ($record) {
@@ -132,16 +132,25 @@ class TransactionResource extends Resource
     {
         $currentStore = Filament::getTenant();
 
-        if (! $currentStore) {
+        if (!$currentStore) {
             // Devuelve una consulta vacía si no hay tienda en sesión
             return Transaction::query()->whereRaw('1 = 0');
         }
 
-        // Filtrar las transacciones asociadas a pagos que pertenezcan a la tienda actual
-        return Transaction::query()->whereHas('payment.subscription', function (Builder $query) use ($currentStore) {
-            $query->where('store_id', $currentStore->id);
-        });
+        // Filtrar transacciones donde la tienda es el origen o el destino
+        return Transaction::query()
+            ->where(function (Builder $query) use ($currentStore) {
+                $query->where(function ($subQuery) use ($currentStore) {
+                    $subQuery->where('from_type', 'App\\Models\\Store')
+                        ->where('from_id', $currentStore->id);
+                })
+                    ->orWhere(function ($subQuery) use ($currentStore) {
+                        $subQuery->where('to_type', 'App\\Models\\Store')
+                            ->where('to_id', $currentStore->id);
+                    });
+            });
     }
+
 
     public static function getPages(): array
     {

@@ -8,13 +8,13 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 
-class TransactionsWidget extends BaseWidget
+class RefundTransactionsWidget extends BaseWidget
 {
-    public $record;
+    public $record; // Asegura que el widget tiene acceso al pago actual
 
     protected function getTableHeading(): ?string
     {
-        return 'Transacciones relacionadas';
+        return 'Transacciones de Vuelto';
     }
 
     protected int|string|array $columnSpan = 'full';
@@ -30,10 +30,6 @@ class TransactionsWidget extends BaseWidget
                     ->label('ID')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('type')
-                    ->label('Tipo de Transacción')
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
                     ->formatStateUsing(fn($record) => $record->status->getLabel())
@@ -43,7 +39,7 @@ class TransactionsWidget extends BaseWidget
 
                 Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')
-                    ->formatStateUsing(fn($record) => '$' . number_format($record->amount / 100, 2)),
+                    ->formatStateUsing(fn($record) => '$' . number_format($record->amount_cents / 100, 2)),
 
                 Tables\Columns\TextColumn::make('date')
                     ->label('Fecha')
@@ -64,10 +60,18 @@ class TransactionsWidget extends BaseWidget
 
     protected function getQuery()
     {
-        // Recupera todas las transacciones relacionadas con el pago actual y que sean de tipo "subscription"
-        return Transaction::query()
-            ->where('payment_id', $this->record->id)
-            ->where('type', 'subscription'); // Agregar filtro por tipo de transacción
-    }
+        // Obtener el store_id del tenant actual
+        $storeId = Filament::getTenant()->id;
 
+        // Asegurar que el widget tiene acceso al pago actual
+        if (!$this->record) {
+            return Transaction::query()->whereRaw('1 = 0'); // Retorna una consulta vacía si no hay un pago asociado
+        }
+
+        return Transaction::query()
+            ->where('to_type', 'App\\Models\\Store')
+            ->where('to_id', $storeId)
+            ->where('type', 'refund')
+            ->where('payment_id', $this->record->id); // Filtrar por el pago actual
+    }
 }
