@@ -156,7 +156,7 @@ class DevelopmentSeeder extends Seeder
         Plan::create([
             'name' => 'Prueba',
             'description' => 'Acceso completo con soporte prioritario.',
-            'price_cents' => 10, // $1000.00
+            'price_cents' => 10,
             'published' => true,
             'featured' => true,
             'store_id' => $store->id,
