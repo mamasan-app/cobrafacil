@@ -16,7 +16,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
-
 use Illuminate\Support\Facades\Log;
 
 class MonitorTransactionStatus implements ShouldQueue
@@ -40,12 +39,12 @@ class MonitorTransactionStatus implements ShouldQueue
                 ->where('is_bs', true)
                 ->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 Log::error("Transacción no encontrada para operationId: {$this->operationId}");
                 throw new \Exception("Transacción no encontrada para el ID de operación: {$this->operationId}");
             }
 
-            Log::info("Transacción encontrada: ", ['id' => $transaction->id, 'monto' => $transaction->amount]);
+            Log::info('Transacción encontrada: ', ['id' => $transaction->id, 'monto' => $transaction->amount]);
 
             // Consultar estado de la operación
             $response = Http::withHeaders([
@@ -64,7 +63,8 @@ class MonitorTransactionStatus implements ShouldQueue
             Log::info("Código de estado de la transacción: $statusCode");
 
             if ($statusCode === 'AC00') {
-                Log::info("Transacción en proceso, no se ejecutará ninguna acción.");
+                Log::info('Transacción en proceso, no se ejecutará ninguna acción.');
+
                 return;
             }
 
@@ -74,7 +74,7 @@ class MonitorTransactionStatus implements ShouldQueue
             $currentDate = now()->setTimezone('America/Caracas');
 
             if ($statusCode === 'ACCP') {
-                Log::info("Transacción aprobada, actualizando estados.");
+                Log::info('Transacción aprobada, actualizando estados.');
 
                 $transaction->update([
                     'status' => TransactionStatusEnum::Succeeded,
@@ -87,20 +87,20 @@ class MonitorTransactionStatus implements ShouldQueue
 
                 // **Validar que la transacción esté asociada a una tienda**
                 if ($transaction->to_type === Store::class) {
-                    Log::info("Transacción asociada a una tienda, obteniendo Store.");
+                    Log::info('Transacción asociada a una tienda, obteniendo Store.');
 
                     $store = $transaction->store;
 
                     if ($store) {
-                        Log::info("Store encontrada: ", ['id' => $store->id, 'nombre' => $store->name]);
+                        Log::info('Store encontrada: ', ['id' => $store->id, 'nombre' => $store->name]);
                     } else {
-                        Log::error("No se encontró Store para la transacción.");
+                        Log::error('No se encontró Store para la transacción.');
                     }
 
                     if ($store) {
-                        Log::info("Store tiene una cuenta bancaria por defecto.");
+                        Log::info('Store tiene una cuenta bancaria por defecto.');
 
-                        $montoTransaction = ($transaction->amount)/100;
+                        $montoTransaction = ($transaction->amount) / 100;
                         $montoVuelto = $montoTransaction - ($montoTransaction * 0.03);
 
                         Log::info("Monto de la transacción: $montoTransaction | Monto del vuelto: $montoVuelto");
@@ -108,21 +108,20 @@ class MonitorTransactionStatus implements ShouldQueue
                         $bankAccount = $store->defaultBankAccount();
 
                         if ($bankAccount) {
-                            Log::info("Store tiene una cuenta bancaria por defecto.", ['bank_account_id' => $bankAccount->id]);
-                            
+                            Log::info('Store tiene una cuenta bancaria por defecto.', ['bank_account_id' => $bankAccount->id]);
+
                             dispatch(new ProcessRefundJob($transaction, $montoVuelto, $store));
-                            Log::info("ProcessRefundJob enviado correctamente.");
+                            Log::info('ProcessRefundJob enviado correctamente.');
                         }
 
-
                     } else {
-                        Log::error("No se pudo procesar el reembolso, la tienda no tiene cuenta bancaria predeterminada.");
+                        Log::error('No se pudo procesar el reembolso, la tienda no tiene cuenta bancaria predeterminada.');
                     }
                 }
 
                 // Procesar suscripción
                 if ($subscription) {
-                    Log::info("Procesando suscripción.");
+                    Log::info('Procesando suscripción.');
 
                     if ($subscription->isOnTrial()) {
                         $renewDate = $currentDate->copy()->addDays($subscription->frequency_days)->toDateString();
@@ -131,9 +130,9 @@ class MonitorTransactionStatus implements ShouldQueue
                         $plan = Plan::find($subscription->service_id);
 
                         if ($plan) {
-                            Log::info("Plan encontrado para la suscripción.");
+                            Log::info('Plan encontrado para la suscripción.');
 
-                            if (!$plan->infinite_duration) {
+                            if (! $plan->infinite_duration) {
                                 $endDate = $currentDate->copy()->addDays($plan->duration)->toDateString();
                                 $subscription->update([
                                     'status' => SubscriptionStatusEnum::Active,
@@ -151,7 +150,7 @@ class MonitorTransactionStatus implements ShouldQueue
                                     'expires_at' => null,
                                     'ends_at' => null,
                                 ]);
-                                Log::info("Suscripción activada sin fecha de expiración.");
+                                Log::info('Suscripción activada sin fecha de expiración.');
                             }
                         } else {
                             Log::error("Plan no encontrado para la suscripción: {$subscription->id}");
@@ -165,11 +164,11 @@ class MonitorTransactionStatus implements ShouldQueue
                             'renews_at' => $renewDate,
                             'expires_at' => $expireDate,
                         ]);
-                        Log::info("Suscripción renovada.");
+                        Log::info('Suscripción renovada.');
                     }
                 }
             } else {
-                Log::error("Transacción fallida, actualizando estado.");
+                Log::error('Transacción fallida, actualizando estado.');
 
                 $transaction->update([
                     'status' => TransactionStatusEnum::Failed,
@@ -187,7 +186,7 @@ class MonitorTransactionStatus implements ShouldQueue
                     ->send();
             }
         } catch (\Exception $e) {
-            Log::error("Error en la verificación de la transacción: " . $e->getMessage());
+            Log::error('Error en la verificación de la transacción: '.$e->getMessage());
 
             Notification::make()
                 ->title('Error en la verificación de la transacción')

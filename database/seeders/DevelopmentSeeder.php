@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Address;
+use App\Models\BankAccount;
 use App\Models\Frequency;
 use App\Models\Plan;
 use App\Models\Store;
@@ -64,6 +65,19 @@ class DevelopmentSeeder extends Seeder
             ->create([
                 'branch' => 'Caracas',
                 'location' => 'Caracas, frente al metro de Chacao',
+            ]);
+
+        BankAccount::factory()
+            ->for($customer)
+            ->create([
+                'default_account' => true,
+            ]);
+
+        BankAccount::factory()
+            ->for($store)
+            ->for($owner)
+            ->create([
+                'default_account' => true,
             ]);
 
         $store->users()->attach($owner->id, ['role' => 'owner_store']);
@@ -130,6 +144,19 @@ class DevelopmentSeeder extends Seeder
             'name' => 'Plan Premium',
             'description' => 'Acceso completo con soporte prioritario.',
             'price_cents' => 100000,
+            'published' => true,
+            'featured' => true,
+            'store_id' => $store->id,
+            'frequency_id' => $this->frequencies[3]->id,
+            'free_days' => 30,
+            'grace_period' => 10,
+            'infinite_duration' => true,
+        ]);
+
+        Plan::create([
+            'name' => 'Prueba',
+            'description' => 'Acceso completo con soporte prioritario.',
+            'price_cents' => 10, // $1000.00
             'published' => true,
             'featured' => true,
             'store_id' => $store->id,

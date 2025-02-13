@@ -2,10 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Models\Payment;
 use App\Models\Store;
-use App\Models\Transaction;
 use App\Models\Store;
-use App\Models\Payment; // Importar el modelo Payment
+use App\Models\Transaction; // Importar el modelo Payment
+use App\Notifications\RefundSuccessfulNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -13,8 +14,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Notifications\RefundSuccessfulNotification;
-use Illuminate\Support\Facades\Notification;
 
 class ProcessRefundJob implements ShouldQueue
 {
@@ -35,8 +34,9 @@ class ProcessRefundJob implements ShouldQueue
 
     public function handle()
     {
-        if (!$this->store->defaultBankAccount()) {
-            Log::error("La tienda no tiene una cuenta bancaria predeterminada.");
+        if (! $this->store->defaultBankAccount()) {
+            Log::error('La tienda no tiene una cuenta bancaria predeterminada.');
+
             return;
         }
 
@@ -47,35 +47,35 @@ class ProcessRefundJob implements ShouldQueue
         $phone = (string) $bankAccount->phone_number;
         $identity = (string) $bankAccount->identity_number;
 
-        Log::info("Enviando solicitud de vuelto", [
+        Log::info('Enviando solicitud de vuelto', [
             'TelefonoDestino' => $phone,
             'Cedula' => $identity,
             'Banco' => $bank,
-            'Monto' => $amount
+            'Monto' => $amount,
         ]);
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
             'Authorization' => hash_hmac(
                 'sha256',
-                $phone . $amount . $bank . $identity,
+                $phone.$amount.$bank.$identity,
                 config('banking.commerce_id')
             ),
             'Commerce' => config('banking.commerce_id'),
         ])->post(config('banking.vuelto_url'), [
-                    'TelefonoDestino' => $phone,
-                    'Cedula' => $identity,
-                    'Banco' => $bank,
-                    'Monto' => $amount,
-                    'Concepto' => 'Vuelto',
-                    'Ip' => request()->ip() ?? '0.0.0.0',
-                ]);
+            'TelefonoDestino' => $phone,
+            'Cedula' => $identity,
+            'Banco' => $bank,
+            'Monto' => $amount,
+            'Concepto' => 'Vuelto',
+            'Ip' => request()->ip() ?? '0.0.0.0',
+        ]);
 
         $responseData = $response->json();
-        Log::info("Respuesta del servicio MBvuelto", ['response' => $responseData]);
+        Log::info('Respuesta del servicio MBvuelto', ['response' => $responseData]);
 
         // Determinar el estado de la transacción
-        $status = ($responseData['code'] === "00") ? 'succeeded' : 'failed';
+        $status = ($responseData['code'] === '00') ? 'succeeded' : 'failed';
 
         // Crear la transacción
         $refundTransaction = Transaction::create([
@@ -92,9 +92,9 @@ class ProcessRefundJob implements ShouldQueue
             'date' => now()->setTimezone('America/Caracas'),
         ]);
 
-        Log::info("Transacción de reembolso creada", [
+        Log::info('Transacción de reembolso creada', [
             'transaction_id' => $refundTransaction->id,
-            'status' => $status
+            'status' => $status,
         ]);
 
         // Si el reembolso fue exitoso, actualizar el pago asociado
@@ -103,14 +103,14 @@ class ProcessRefundJob implements ShouldQueue
 
             if ($payment) {
                 $payment->update(['paid' => true]);
-                Log::info("Pago actualizado como pagado", ['payment_id' => $payment->id]);
+                Log::info('Pago actualizado como pagado', ['payment_id' => $payment->id]);
 
                 // Enviar notificación a la tienda
                 $this->store->notify(new RefundSuccessfulNotification($this->store, $this->montoVuelto));
-                Log::info("Notificación de reembolso enviado a la tienda", ['store_id' => $this->store->id]);
+                Log::info('Notificación de reembolso enviado a la tienda', ['store_id' => $this->store->id]);
             } else {
-                Log::error("No se encontró el pago asociado a la transacción.", [
-                    'transaction_id' => $this->transaction->id
+                Log::error('No se encontró el pago asociado a la transacción.', [
+                    'transaction_id' => $this->transaction->id,
                 ]);
             }
         }
