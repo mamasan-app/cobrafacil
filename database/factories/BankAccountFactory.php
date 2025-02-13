@@ -20,7 +20,7 @@ class BankAccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'bank_code' => BankEnum::all()->random()[0]->code(),
+            'bank_code' => BankEnum::all()->random()->code(),
             'phone_number' => '+58412'.fake()->randomNumber(7),
             'identity_document' => 'V'.fake()->randomNumber(8),
             'default_account' => true,
