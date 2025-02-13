@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class BankAccountResource extends Resource
 {
@@ -24,7 +25,7 @@ class BankAccountResource extends Resource
 
     protected static ?string $navigationGroup = 'Gestión de Pagos';
 
-    protected static ?string $modelLabel = 'Cuentas en Bs';
+    protected static ?string $modelLabel = 'Cuentas';
 
     public static function form(Form $form): Form
     {
@@ -71,7 +72,6 @@ class BankAccountResource extends Resource
                 TextColumn::make('bank_code')
                     ->label('Banco')
                     ->formatStateUsing(function ($state) {
-                        // Buscar el enum correspondiente al código del banco
                         $bank = collect(BankEnum::cases())
                             ->first(fn ($bank) => $bank->code() === $state);
 
@@ -99,6 +99,12 @@ class BankAccountResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('user_id', auth()->id());
     }
 
     public static function getRelations(): array
