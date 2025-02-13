@@ -120,7 +120,7 @@ class Transaction extends Model
      */
     public function getMetadataAsObject()
     {
-        if (!isset($this->metadata) || !is_array($this->metadata)) {
+        if (! isset($this->metadata) || ! is_array($this->metadata)) {
             return null;
         }
 

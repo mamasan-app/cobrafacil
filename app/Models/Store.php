@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Notifications\Notifiable;
 
 class Store extends Model
 {
@@ -117,10 +117,7 @@ class Store extends Model
 
     /**
      * Obtiene la cuenta bancaria por defecto de la tienda.
-     *
-     * @return BankAccount|null
      */
-
     public function defaultBankAccount(): ?BankAccount
     {
         return $this->hasOne(BankAccount::class, 'store_id')->where('default_account', 1)->first();

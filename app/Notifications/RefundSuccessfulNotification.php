@@ -3,15 +3,16 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class RefundSuccessfulNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     protected $store;
+
     protected $amount;
 
     public function __construct($store, $amount)
@@ -27,13 +28,13 @@ class RefundSuccessfulNotification extends Notification implements ShouldQueue
 
     public function toMail($notifiable)
     {
-        $storeUrl = env('APP_URL') . "/tienda/{$this->store->slug}/transactions";
-        
+        $storeUrl = env('APP_URL')."/tienda/{$this->store->slug}/transactions";
+
         return (new MailMessage)
             ->subject('Pago de Vuelto Realizado Exitosamente')
-            ->greeting('¡Hola ' . $this->store->name . '!')
+            ->greeting('¡Hola '.$this->store->name.'!')
             ->line('Se ha realizado un pago de vuelto exitosamente.')
-            ->line('Monto recibido: Bs' . number_format($this->amount, 2) . ' USD')
+            ->line('Monto recibido: Bs'.number_format($this->amount, 2).' USD')
             ->line('Gracias por confiar en nuestro servicio.')
             ->action('Ver detalles', $storeUrl)
             ->salutation('Saludos, Equipo de Mamapay');

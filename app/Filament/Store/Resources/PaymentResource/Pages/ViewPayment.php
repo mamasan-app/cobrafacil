@@ -3,8 +3,8 @@
 namespace App\Filament\Store\Resources\PaymentResource\Pages;
 
 use App\Filament\Store\Resources\PaymentResource;
-use App\Filament\Store\Resources\PaymentResource\Widgets\TransactionsWidget;
 use App\Filament\Store\Resources\PaymentResource\Widgets\RefundTransactionsWidget;
+use App\Filament\Store\Resources\PaymentResource\Widgets\TransactionsWidget;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewPayment extends ViewRecord

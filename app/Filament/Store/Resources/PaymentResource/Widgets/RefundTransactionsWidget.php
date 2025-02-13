@@ -32,14 +32,14 @@ class RefundTransactionsWidget extends BaseWidget
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')
-                    ->formatStateUsing(fn($record) => $record->status->getLabel())
+                    ->formatStateUsing(fn ($record) => $record->status->getLabel())
                     ->badge()
-                    ->color(fn($record) => $record->status->getColor())
+                    ->color(fn ($record) => $record->status->getColor())
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')
-                    ->formatStateUsing(fn($record) => '$' . number_format($record->amount_cents / 100, 2)),
+                    ->formatStateUsing(fn ($record) => '$'.number_format($record->amount_cents / 100, 2)),
 
                 Tables\Columns\TextColumn::make('date')
                     ->label('Fecha')
@@ -50,7 +50,7 @@ class RefundTransactionsWidget extends BaseWidget
             ->actions([
                 Tables\Actions\Action::make('view')
                     ->label('Ver')
-                    ->url(fn($record) => route('filament.store.resources.transactions.view', [
+                    ->url(fn ($record) => route('filament.store.resources.transactions.view', [
                         'tenant' => Filament::getTenant()->slug, // Obtener el tenant actual
                         'record' => $record->id,
                     ]))
@@ -64,7 +64,7 @@ class RefundTransactionsWidget extends BaseWidget
         $storeId = Filament::getTenant()->id;
 
         // Asegurar que el widget tiene acceso al pago actual
-        if (!$this->record) {
+        if (! $this->record) {
             return Transaction::query()->whereRaw('1 = 0'); // Retorna una consulta vacía si no hay un pago asociado
         }
 

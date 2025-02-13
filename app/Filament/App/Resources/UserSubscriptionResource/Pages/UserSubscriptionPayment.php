@@ -188,7 +188,7 @@ class UserSubscriptionPayment extends Page
 
         try {
             $otpResponse = $this->generateOtp();
-            //dd($otpResponse);
+            // dd($otpResponse);
 
             if (! isset($otpResponse['success']) || ! $otpResponse['success']) {
                 Notification::make()
