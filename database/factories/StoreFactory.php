@@ -18,9 +18,9 @@ class StoreFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name,
-            'url' => fake()->url,
-            'slug' => fake()->slug,
+            'name' => fake()->company(),
+            'url' => fake()->url(),
+            'slug' => fake()->slug(),
             'constitutive_document_path' => null,
             'rif_path' => null,
             'description' => fake()->text(),

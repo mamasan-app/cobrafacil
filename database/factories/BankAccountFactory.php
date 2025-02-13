@@ -22,7 +22,7 @@ class BankAccountFactory extends Factory
         return [
             'bank_code' => BankEnum::all()->random()->code(),
             'phone_number' => '+58412'.fake()->randomNumber(7),
-            'identity_document' => 'V'.fake()->randomNumber(8),
+            'identity_number' => 'V'.fake()->randomNumber(8),
             'default_account' => true,
             'store_id' => Store::factory(),
             'user_id' => User::factory(),

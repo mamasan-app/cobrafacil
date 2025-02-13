@@ -24,12 +24,12 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => fake()->lexify('########'),
+            'code' => fake()->bothify('########'),
             'first_name' => fake()->name(),
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'phone_number' => '+58424'.fake()->lexify('#######'),
+            'phone_number' => '+58424'.fake()->bothify('#######'),
             'identity_document' => 'V-'.fake()->numberBetween(10_000_000, 40_000_000),
             'password' => static::$password ??= Hash::make('password'),
             'birth_date' => fake()->dateTimeBetween('-30 years, -20 years'),
