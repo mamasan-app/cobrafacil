@@ -596,7 +596,7 @@ class StripeWebhookController extends Controller
                 if (! $transaction) {
                     $subscription = Subscription::where('id', $payment->subscription_id)->first();
                     $store = Store::where('id', $subscription->store_id)->first();
-                    Transaction::create([
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => get_class($store), // Valor temporal hasta que se cree el invoice
@@ -611,16 +611,46 @@ class StripeWebhookController extends Controller
                         'stripe_invoice_id' => $invoiceId,
                     ]);
 
+                    Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => get_class($store),
+                        'to_id' => $store->id,
+                        'type' => 'refund',
+                        'status' => 'processing',
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
                 }
             } else {
                 if (! $transaction) {
-                    Transaction::create([
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => null, // Valor temporal hasta que se cree el invoice
                         'to_id' => null, // Valor temporal hasta que se cree el invoice
                         'type' => TransactionTypeEnum::Subscription->value,
                         'status' => Transaction::mapStripeStatusToLocal($paymentIntent->status),
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
+                    Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => null,
+                        'to_id' => null,
+                        'type' => 'refund',
+                        'status' => 'processing',
                         'date' => now()->setTimezone('America/Caracas'),
                         'amount_cents' => $paymentIntent->amount,
                         'metadata' => $paymentIntent->toArray(),
@@ -662,7 +692,7 @@ class StripeWebhookController extends Controller
                 if ($payment) {
                     $subscription = Subscription::where('id', $payment->subscription_id)->first();
                     $store = Store::where('id', $subscription->store_id)->first();
-                    Transaction::create([
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => get_class($store), // Valor temporal hasta que se cree el invoice
@@ -677,8 +707,23 @@ class StripeWebhookController extends Controller
                         'stripe_invoice_id' => $invoiceId,
                     ]);
 
-                } else {
                     Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => get_class($store),
+                        'to_id' => $store->id,
+                        'type' => 'refund',
+                        'status' => 'processing',
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
+                } else {
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => null, // Valor temporal hasta que se cree el invoice
@@ -692,6 +737,22 @@ class StripeWebhookController extends Controller
                         'stripe_payment_id' => $paymentIntent->id,
                         'stripe_invoice_id' => $invoiceId,
                     ]);
+
+                    Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => null,
+                        'to_id' => null,
+                        'type' => 'refund',
+                        'status' => 'processing',
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
                 }
             }
         } else {
@@ -715,7 +776,7 @@ class StripeWebhookController extends Controller
                 if ($payment) {
                     $subscription = Subscription::where('id', $payment->subscription_id)->first();
                     $store = Store::where('id', $subscription->store_id)->first();
-                    Transaction::create([
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => get_class($store), // Valor temporal hasta que se cree el invoice
@@ -730,14 +791,44 @@ class StripeWebhookController extends Controller
                         'stripe_invoice_id' => $invoiceId,
                     ]);
 
-                } else {
                     Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => get_class($store),
+                        'to_id' => $store->id,
+                        'type' => 'refund',
+                        'status' => 'processing',
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
+                } else {
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => null, // Valor temporal hasta que se cree el invoice
                         'to_id' => null, // Valor temporal hasta que se cree el invoice
                         'type' => TransactionTypeEnum::Subscription->value,
                         'status' => Transaction::mapStripeStatusToLocal($paymentIntent->status),
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
+                    Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => null,
+                        'to_id' => null,
+                        'type' => 'refund',
+                        'status' => 'processing',
                         'date' => now()->setTimezone('America/Caracas'),
                         'amount_cents' => $paymentIntent->amount,
                         'metadata' => $paymentIntent->toArray(),
@@ -766,7 +857,7 @@ class StripeWebhookController extends Controller
                 if ($payment) {
                     $subscription = Subscription::where('id', $payment->subscription_id)->first();
                     $store = Store::where('id', $subscription->store_id)->first();
-                    Transaction::create([
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => get_class($store), // Valor temporal hasta que se cree el invoice
@@ -781,14 +872,44 @@ class StripeWebhookController extends Controller
                         'stripe_invoice_id' => $invoiceId,
                     ]);
 
-                } else {
                     Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => get_class($store),
+                        'to_id' => $store->id,
+                        'type' => 'refund',
+                        'status' => 'processing',
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
+                } else {
+                    $newT = Transaction::create([
                         'from_type' => get_class($customer), // Valor temporal hasta que se cree el invoice
                         'from_id' => $customer ? $customer->id : null, // Asignar el ID del cliente si está disponible
                         'to_type' => null, // Valor temporal hasta que se cree el invoice
                         'to_id' => null, // Valor temporal hasta que se cree el invoice
                         'type' => TransactionTypeEnum::Subscription->value,
                         'status' => Transaction::mapStripeStatusToLocal($paymentIntent->status),
+                        'date' => now()->setTimezone('America/Caracas'),
+                        'amount_cents' => $paymentIntent->amount,
+                        'metadata' => $paymentIntent->toArray(),
+                        'payment_id' => $payment ? $payment->id : null,
+                        'stripe_payment_id' => $paymentIntent->id,
+                        'stripe_invoice_id' => $invoiceId,
+                    ]);
+
+                    Transaction::create([
+                        'from_type' => Transaction::class,
+                        'from_id' => $newT->id,
+                        'to_type' => null,
+                        'to_id' => null,
+                        'type' => 'refund',
+                        'status' => 'processing',
                         'date' => now()->setTimezone('America/Caracas'),
                         'amount_cents' => $paymentIntent->amount,
                         'metadata' => $paymentIntent->toArray(),

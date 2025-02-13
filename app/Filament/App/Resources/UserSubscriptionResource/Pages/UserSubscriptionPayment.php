@@ -188,6 +188,7 @@ class UserSubscriptionPayment extends Page
 
         try {
             $otpResponse = $this->generateOtp();
+            // dd($otpResponse);
 
             if (! isset($otpResponse['success']) || ! $otpResponse['success']) {
                 Notification::make()
@@ -344,7 +345,7 @@ class UserSubscriptionPayment extends Page
             'type' => TransactionTypeEnum::Subscription->value,
             'status' => TransactionStatusEnum::Processing,
             'date' => now()->setTimezone('America/Caracas'),
-            'amount_cents' => $payment->amount_cents,
+            'amount_cents' => $amount * 100,
             'metadata' => $response->json(),
             'payment_id' => $payment->id,
             'is_bs' => true,

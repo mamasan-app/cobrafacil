@@ -137,10 +137,18 @@ class TransactionResource extends Resource
             return Transaction::query()->whereRaw('1 = 0');
         }
 
-        // Filtrar las transacciones asociadas a pagos que pertenezcan a la tienda actual
-        return Transaction::query()->whereHas('payment.subscription', function (Builder $query) use ($currentStore) {
-            $query->where('store_id', $currentStore->id);
-        });
+        // Filtrar transacciones donde la tienda es el origen o el destino
+        return Transaction::query()
+            ->where(function (Builder $query) use ($currentStore) {
+                $query->where(function ($subQuery) use ($currentStore) {
+                    $subQuery->where('from_type', 'App\\Models\\Store')
+                        ->where('from_id', $currentStore->id);
+                })
+                    ->orWhere(function ($subQuery) use ($currentStore) {
+                        $subQuery->where('to_type', 'App\\Models\\Store')
+                            ->where('to_id', $currentStore->id);
+                    });
+            });
     }
 
     public static function getPages(): array

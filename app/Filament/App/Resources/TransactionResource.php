@@ -12,6 +12,7 @@ use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionResource extends Resource
 {
@@ -32,6 +33,10 @@ class TransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                Transaction::query()->where('from_type', 'App\\Models\\User')
+                    ->where('from_id', Auth::id()) // Filtrar por usuario en sesión
+            )
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')

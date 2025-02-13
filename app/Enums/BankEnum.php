@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
+use Illuminate\Support\Collection;
 
 enum BankEnum: string implements HasLabel
 {
@@ -86,5 +87,34 @@ enum BankEnum: string implements HasLabel
             self::NacionalDeCredito => 'Banco Nacional de Crédito C.A., Banco Universal',
             self::InstitutoCreditoPopular => 'Instituto Municipal de Crédito Popular',
         };
+    }
+
+    public static function all(): Collection
+    {
+        return collect([
+            self::Venezuela,
+            self::VenezolanoDeCredito,
+            self::Mercantil,
+            self::Provincial,
+            self::DelCaribe,
+            self::Exterior,
+            self::Caroni,
+            self::Banesco,
+            self::Sofitasa,
+            self::Plaza,
+            self::FondoComun,
+            self::Banco100,
+            self::DelSur,
+            self::DelTesoro,
+            self::Bancrecer,
+            self::MiBanco,
+            self::Activo,
+            self::Bancamiga,
+            self::Banplus,
+            self::Bicentenario,
+            self::BanFanb,
+            self::NacionalDeCredito,
+            self::InstitutoCreditoPopular,
+        ]);
     }
 }

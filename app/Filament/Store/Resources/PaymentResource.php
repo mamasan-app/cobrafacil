@@ -6,7 +6,6 @@ use App\Enums\PaymentStatusEnum;
 use App\Filament\Store\Resources\PaymentResource\Pages;
 use App\Models\Payment;
 use Filament\Facades\Filament;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\Tabs\Tab;
@@ -62,9 +61,9 @@ class PaymentResource extends Resource
                     ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
                     ->sortable(),
 
-                Forms\Components\Toggle::make('charged')
-                    ->label('Cobrado')
-                    ->required(),
+                Tables\Columns\IconColumn::make('paid')
+                    ->label('Pagado')
+                    ->boolean(),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado')

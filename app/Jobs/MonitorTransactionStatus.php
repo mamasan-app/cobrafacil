@@ -16,6 +16,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MonitorTransactionStatus implements ShouldQueue
 {
@@ -23,30 +24,27 @@ class MonitorTransactionStatus implements ShouldQueue
 
     protected $operationId;
 
-    /**
-     * Create a new job instance.
-     *
-     * @param  string  $operationId
-     */
     public function __construct($operationId)
     {
         $this->operationId = $operationId;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle()
     {
         try {
+            Log::info("Iniciando MonitorTransactionStatus para operationId: {$this->operationId}");
+
             // Obtener la transacción asociada al operationId
             $transaction = Transaction::where('metadata->id', $this->operationId)
                 ->where('is_bs', true)
                 ->first();
 
             if (! $transaction) {
+                Log::error("Transacción no encontrada para operationId: {$this->operationId}");
                 throw new \Exception("Transacción no encontrada para el ID de operación: {$this->operationId}");
             }
+
+            Log::info('Transacción encontrada: ', ['id' => $transaction->id, 'monto' => $transaction->amount]);
 
             // Consultar estado de la operación
             $response = Http::withHeaders([
@@ -62,9 +60,11 @@ class MonitorTransactionStatus implements ShouldQueue
             ]);
 
             $statusCode = $response->json()['code'] ?? null;
+            Log::info("Código de estado de la transacción: $statusCode");
 
             if ($statusCode === 'AC00') {
-                // Transacción en proceso: no hacer nada
+                Log::info('Transacción en proceso, no se ejecutará ninguna acción.');
+
                 return;
             }
 
@@ -74,6 +74,7 @@ class MonitorTransactionStatus implements ShouldQueue
             $currentDate = now()->setTimezone('America/Caracas');
 
             if ($statusCode === 'ACCP') {
+                Log::info('Transacción aprobada, actualizando estados.');
 
                 $transaction->update([
                     'status' => TransactionStatusEnum::Succeeded,
@@ -86,71 +87,89 @@ class MonitorTransactionStatus implements ShouldQueue
 
                 // **Validar que la transacción esté asociada a una tienda**
                 if ($transaction->to_type === Store::class) {
-                    $store = Store::find($transaction->to_id);
+                    Log::info('Transacción asociada a una tienda, obteniendo Store.');
 
-                    if ($store && $store->bank_account_default) {
-                        $montoTransaction = $transaction->amount;
+                    $store = $transaction->store;
+
+                    if ($store) {
+                        Log::info('Store encontrada: ', ['id' => $store->id, 'nombre' => $store->name]);
+                    } else {
+                        Log::error('No se encontró Store para la transacción.');
+                    }
+
+                    if ($store) {
+                        Log::info('Store tiene una cuenta bancaria por defecto.');
+
+                        $montoTransaction = ($transaction->amount) / 100;
                         $montoVuelto = $montoTransaction - ($montoTransaction * 0.03);
 
-                        dispatch(new ProcessRefundJob($transaction, $montoVuelto, $store));
+                        Log::info("Monto de la transacción: $montoTransaction | Monto del vuelto: $montoVuelto");
+
+                        $bankAccount = $store->defaultBankAccount();
+
+                        if ($bankAccount) {
+                            Log::info('Store tiene una cuenta bancaria por defecto.', ['bank_account_id' => $bankAccount->id]);
+
+                            dispatch(new ProcessRefundJob($transaction, $montoVuelto, $store));
+                            Log::info('ProcessRefundJob enviado correctamente.');
+                        }
+
+                    } else {
+                        Log::error('No se pudo procesar el reembolso, la tienda no tiene cuenta bancaria predeterminada.');
                     }
                 }
 
-                if ($subscription && $subscription->isOnTrial()) {
-                    // Calcular las fechas de forma independiente
-                    $renewDate = $currentDate->copy()->addDays($subscription->frequency_days)->toDateString();
-                    $expireDate = $currentDate->copy()->addDays($subscription->frequency_days + $subscription->service_grace_period)->toDateString();
+                // Procesar suscripción
+                if ($subscription) {
+                    Log::info('Procesando suscripción.');
 
-                    $plan = Plan::find($subscription->service_id);
+                    if ($subscription->isOnTrial()) {
+                        $renewDate = $currentDate->copy()->addDays($subscription->frequency_days)->toDateString();
+                        $expireDate = $currentDate->copy()->addDays($subscription->frequency_days + $subscription->service_grace_period)->toDateString();
 
-                    if ($plan) {
-                        if (! $plan->infinite_duration) {
-                            // Plan finito: calcular la fecha de expiración
-                            $endDate = $currentDate->copy()->addDays($plan->duration)->toDateString();
+                        $plan = Plan::find($subscription->service_id);
 
-                            $subscription->update([
-                                'status' => SubscriptionStatusEnum::Active,
-                                'trial_ends_at' => $currentDate->toDateString(), // Finaliza el periodo de prueba
-                                'renews_at' => $renewDate,
-                                'expires_at' => $expireDate,
-                                'ends_at' => $endDate,
-                            ]);
+                        if ($plan) {
+                            Log::info('Plan encontrado para la suscripción.');
 
-                            Notification::make()
-                                ->title('Suscripción activada')
-                                ->body("La suscripción ha sido activada con fecha de expiración: $endDate.")
-                                ->success()
-                                ->send();
+                            if (! $plan->infinite_duration) {
+                                $endDate = $currentDate->copy()->addDays($plan->duration)->toDateString();
+                                $subscription->update([
+                                    'status' => SubscriptionStatusEnum::Active,
+                                    'trial_ends_at' => $currentDate->toDateString(),
+                                    'renews_at' => $renewDate,
+                                    'expires_at' => $expireDate,
+                                    'ends_at' => $endDate,
+                                ]);
+                                Log::info("Suscripción activada con fecha de expiración: $endDate.");
+                            } else {
+                                $subscription->update([
+                                    'status' => SubscriptionStatusEnum::Active,
+                                    'trial_ends_at' => $currentDate->copy()->toDateString(),
+                                    'renews_at' => $renewDate,
+                                    'expires_at' => null,
+                                    'ends_at' => null,
+                                ]);
+                                Log::info('Suscripción activada sin fecha de expiración.');
+                            }
                         } else {
-                            // Plan infinito: no tiene fecha de expiración
-                            $subscription->update([
-                                'status' => SubscriptionStatusEnum::Active,
-                                'trial_ends_at' => $currentDate->copy()->toDateString(), // Finaliza el periodo de prueba
-                                'renews_at' => $renewDate,
-                                'expires_at' => null, // Infinito
-                                'ends_at' => null,
-                            ]);
-
-                            Notification::make()
-                                ->title('Suscripción activada')
-                                ->body('La suscripción ha sido activada sin fecha de expiración.')
-                                ->success()
-                                ->send();
+                            Log::error("Plan no encontrado para la suscripción: {$subscription->id}");
                         }
                     } else {
-                        throw new \Exception("Plan no encontrado para la suscripción: {$subscription->id}");
-                    }
-                } elseif ($subscription && ! $subscription->isOnTrial) {
-                    $renewDate = $subscription->renews_at->copy()->addDays($subscription->frequency_days)->toDateString();
-                    $expireDate = $subscription->renews_at->copy()->addDays($subscription->frequency_days + $subscription->service_grace_period)->toDateString();
+                        $renewDate = $subscription->renews_at->copy()->addDays($subscription->frequency_days)->toDateString();
+                        $expireDate = $subscription->renews_at->copy()->addDays($subscription->frequency_days + $subscription->service_grace_period)->toDateString();
 
-                    $subscription->update([
-                        'status' => SubscriptionStatusEnum::Active,
-                        'renews_at' => $renewDate,
-                        'expires_at' => $expireDate,
-                    ]);
+                        $subscription->update([
+                            'status' => SubscriptionStatusEnum::Active,
+                            'renews_at' => $renewDate,
+                            'expires_at' => $expireDate,
+                        ]);
+                        Log::info('Suscripción renovada.');
+                    }
                 }
             } else {
+                Log::error('Transacción fallida, actualizando estado.');
+
                 $transaction->update([
                     'status' => TransactionStatusEnum::Failed,
                     'metadata' => $response->json(),
@@ -160,23 +179,6 @@ class MonitorTransactionStatus implements ShouldQueue
                     'status' => PaymentStatusEnum::Failed,
                 ]);
 
-                if ($subscription && ! $subscription->isOnTrial && $currentDate->copy()->greaterThanOrEqualTo($subscription->expires_at)) {
-                    $subscription->update([
-                        'status' => SubscriptionStatusEnum::Cancelled,
-                    ]);
-                } elseif ($subscription && $subscription->isActive && $currentDate->copy()->greaterThan($subscription->renews_at)) {
-
-                    if ($currentDate->copy()->lessThan($subscription->expires_at)) {
-                        $subscription->update([
-                            'status' => SubscriptionStatusEnum::PastDue,
-                        ]);
-                    } else {
-                        $subscription->update([
-                            'status' => SubscriptionStatusEnum::Cancelled,
-                        ]);
-                    }
-                }
-
                 Notification::make()
                     ->title('Pago fallido')
                     ->body('El primer pago no pudo completarse. Verifica la transacción o inténtalo nuevamente.')
@@ -184,6 +186,8 @@ class MonitorTransactionStatus implements ShouldQueue
                     ->send();
             }
         } catch (\Exception $e) {
+            Log::error('Error en la verificación de la transacción: '.$e->getMessage());
+
             Notification::make()
                 ->title('Error en la verificación de la transacción')
                 ->body('Detalles: '.$e->getMessage())
