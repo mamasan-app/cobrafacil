@@ -124,14 +124,12 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
             ->withTimestamps();
     }
 
-    // Obtener tiendas donde el usuario es 'employee'
-    public function employeeStores()
+    public function storesAsEmployee()
     {
         return $this->stores()->wherePivot('role', 'employee');
     }
 
-    // Obtener tiendas donde el usuario es 'customer'
-    public function customerStores()
+    public function storesAsCustomer()
     {
         return $this->stores()->wherePivot('role', 'customer');
     }
