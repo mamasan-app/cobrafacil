@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use Illuminate\Support\Collection;
+
 enum IdentityPrefixEnum: string
 {
     case V = 'V';
@@ -15,5 +17,14 @@ enum IdentityPrefixEnum: string
             self::E => 'Extranjero',
             self::J => 'Jurídico',
         };
+    }
+
+    public static function all(): Collection
+    {
+        return collect([
+            self::V,
+            self::E,
+            self::J,
+        ]);
     }
 }

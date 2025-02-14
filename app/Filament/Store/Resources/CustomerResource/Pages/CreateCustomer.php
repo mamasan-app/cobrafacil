@@ -78,13 +78,6 @@ class CreateCustomer extends CreateRecord
         }
     }
 
-    protected function mutateDataBeforeCreate(array $data): array
-    {
-        $data['identity_document'] = $data['identity_prefix'].'-'.$data['identity_number'];
-
-        return $data;
-    }
-
     protected function sendMagicLink(User $user): void
     {
         $route = route('filament.app.pages.dashboard');

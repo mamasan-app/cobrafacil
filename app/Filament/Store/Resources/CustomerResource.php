@@ -2,7 +2,7 @@
 
 namespace App\Filament\Store\Resources;
 
-use App\Enums\IdentityPrefixEnum;
+use App\Filament\Inputs;
 use App\Filament\Store\Resources\CustomerResource\Pages;
 use App\Models\User;
 use Filament\Forms;
@@ -58,43 +58,30 @@ class CustomerResource extends Resource
                         Forms\Components\TextInput::make('first_name')
                             ->label('Nombre')
                             ->required()
-                            ->hidden(fn ($get) => ! $get('showAdditionalFields')),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Forms\Components\TextInput::make('last_name')
                             ->label('Apellido')
                             ->required()
-                            ->hidden(fn ($get) => ! $get('showAdditionalFields')),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
-                        Forms\Components\TextInput::make('phone_number')
-                            ->label('Número de Teléfono')
+                        Inputs\PhoneNumberInput::make()
                             ->required()
-                            ->unique('users', 'phone_number')
-                            ->hidden(fn ($get) => ! $get('showAdditionalFields')),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields'))
+                            ->unique('users', 'phone_number'),
 
-                        Forms\Components\Select::make('identity_prefix')
-                            ->label('Tipo de Cédula')
-                            ->options(
-                                collect(IdentityPrefixEnum::cases())
-                                    ->mapWithKeys(fn ($prefix) => [$prefix->value => $prefix->getLabel()])
-                                    ->toArray()
-                            )
+                        Inputs\IdentityPrefixSelect::make()
                             ->required()
-                            ->hidden(fn ($get) => ! $get('showAdditionalFields')),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
-                        Forms\Components\TextInput::make('identity_number')
-                            ->label('Número de Cédula')
-                            ->unique('users', 'identity_document')
-                            ->numeric()
-                            ->minLength(6)
-                            ->maxLength(20)
-                            ->unique('users', 'identity_document')
+                        Inputs\IdentityDocumentInput::make()
                             ->required()
-                            ->hidden(fn ($get) => ! $get('showAdditionalFields')),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Forms\Components\DatePicker::make('birth_date')
                             ->label('Fecha de Nacimiento')
                             ->nullable()
-                            ->hidden(fn ($get) => ! $get('showAdditionalFields')),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
                     ]),
             ]);
     }
