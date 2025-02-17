@@ -74,6 +74,12 @@ class CreateCustomer extends CreateRecord
         $user = User::where('email', $this->email)->first();
 
         if ($user) {
+            $store = Filament::getTenant();
+            $user->stores()->attach($store->id, ['role' => 'customer']);
+
+            $user->email_verified_at = now();
+            $user->save();
+
             $this->sendMagicLink($user);
         }
     }
