@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CustomerResource extends Resource
 {
@@ -18,6 +19,8 @@ class CustomerResource extends Resource
     protected static ?string $modelLabel = 'Cliente';
 
     protected static ?string $pluralModelLabel = 'Clientes';
+
+    protected static ?string $navigationGroup = 'Usuarios';
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
@@ -74,7 +77,7 @@ class CustomerResource extends Resource
                             ->required()
                             ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
-                        Inputs\IdentityDocumentInput::make()
+                        Inputs\IdentityNumberInput::make()
                             ->required()
                             ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
@@ -143,6 +146,13 @@ class CustomerResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->whereHas('stores', function ($query): void {
+            $query->where('store_user.role', 'customer');
+        });
     }
 
     public static function getRelations(): array

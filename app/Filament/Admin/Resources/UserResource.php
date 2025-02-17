@@ -3,7 +3,7 @@
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\UserResource\Pages;
-use App\Filament\Inputs\IdentityDocumentTextInput;
+use App\Filament\Inputs;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -40,13 +40,14 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\TextInput::make('phone_number')
-                    ->label('Número de teléfono')
-                    ->tel()
+                Inputs\PhoneNumberInput::make()
                     ->required()
-                    ->maxLength(255),
+                    ->unique('users', 'phone_number'),
 
-                IdentityDocumentTextInput::make('identity_document')
+                Inputs\IdentityPrefixSelect::make()
+                    ->required(),
+
+                Inputs\IdentityNumberInput::make()
                     ->required(),
 
                 Forms\Components\DatePicker::make('birth_date')
@@ -140,7 +141,9 @@ class UserResource extends Resource
 
                 Tables\Columns\TextColumn::make('identity_document')
                     ->label('Identidificación')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->whereRaw('CONCAT(identity_prefix,"-",identity_number) LIKE ?', ["{$search}%"]);
+                    })
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('birth_date')

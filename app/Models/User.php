@@ -93,7 +93,7 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
     public function identityDocument(): Attribute
     {
         return Attribute::make(
-            get: fn () => "{$this->identity_prefix}-{$this->identity_number}",
+            get: fn () => "{$this->identity_prefix->value}-{$this->identity_number}",
         );
     }
 

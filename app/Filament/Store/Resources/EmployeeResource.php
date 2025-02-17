@@ -2,7 +2,7 @@
 
 namespace App\Filament\Store\Resources;
 
-use App\Filament\Inputs\IdentityDocumentTextInput;
+use App\Filament\Inputs;
 use App\Filament\Store\Resources\EmployeeResource\Pages;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -19,7 +19,9 @@ class EmployeeResource extends Resource
 
     protected static ?string $modelLabel = 'Empleados';
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationGroup = 'Usuarios';
+
+    protected static ?string $navigationIcon = 'heroicon-o-identification';
 
     public static function form(Form $form): Form
     {
@@ -40,13 +42,15 @@ class EmployeeResource extends Resource
                     ->required()
                     ->maxLength(255),
 
-                Forms\Components\TextInput::make('phone_number')
-                    ->label('Número de teléfono')
-                    ->tel()
+                Inputs\PhoneNumberInput::make()
                     ->required()
-                    ->maxLength(255),
+                    ->unique('users', 'phone_number'),
 
-                IdentityDocumentTextInput::make('identity_prefix', 'identity_number'),
+                Inputs\IdentityPrefixSelect::make()
+                    ->required(),
+
+                Inputs\IdentityNumberInput::make()
+                    ->required(),
 
                 Forms\Components\Select::make('stores')
                     ->label('Tiendas')
@@ -116,7 +120,9 @@ class EmployeeResource extends Resource
 
                 Tables\Columns\TextColumn::make('identity_document')
                     ->label('Identidificación')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->whereRaw('CONCAT(identity_prefix,"-",identity_number) LIKE ?', ["{$search}%"]);
+                    })
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('birth_date')
