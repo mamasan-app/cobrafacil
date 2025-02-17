@@ -3,19 +3,14 @@
 namespace App\Filament\Store\Resources;
 
 use App\Enums\BankEnum;
-use App\Enums\PhonePrefixEnum;
 use App\Filament\Inputs;
 use App\Filament\Store\Resources\BankAccountResource\Pages;
 use App\Models\BankAccount;
 use Filament\Facades\Filament;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -29,40 +24,29 @@ class BankAccountResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('bank_code')
-                    ->label('Banco')
-                    ->options(
-                        collect(BankEnum::cases())->mapWithKeys(fn ($bank) => [$bank->code() => $bank->getLabel()])->toArray()
-                    )
-                    ->required(),
-
-                Grid::make(2)
+                Forms\Components\Section::make('Cuenta Bancaria')
                     ->schema([
-                        Select::make('phone_prefix')
-                            ->label('Prefijo Telefónico')
-                            ->options(
-                                collect(PhonePrefixEnum::cases())
-                                    ->mapWithKeys(fn ($prefix) => [$prefix->value => $prefix->getLabel()])
-                                    ->toArray()
-                            )
+                        Forms\Components\Select::make('bank_code')
+                            ->label('Banco')
+                            ->options(BankEnum::class)
+                            ->searchable()
                             ->required(),
-                        TextInput::make('phone_number')
-                            ->label('Número Telefónico')
-                            ->numeric()
-                            ->minLength(7)
-                            ->maxLength(7)
+
+                        Inputs\PhoneNumberInput::make()
+                            ->label('Número de teléfono')
+                            ->required(),
+
+                        Inputs\IdentityPrefixSelect::make()
+                            ->required(),
+
+                        Inputs\IdentityNumberInput::make()
+                            ->required(),
+
+                        Forms\Components\Toggle::make('default_account')
+                            ->columnSpanFull()
+                            ->label('Predeterminada')
                             ->required(),
                     ]),
-                Forms\Components\Toggle::make('default_account')
-                    ->label('Predeterminada')
-                    ->required(),
-
-                Inputs\IdentityPrefixSelect::make()
-                    ->required(),
-
-                Inputs\IdentityNumberInput::make()
-                    ->required(),
-
             ]);
     }
 
@@ -70,26 +54,24 @@ class BankAccountResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')
+                Tables\Columns\TextColumn::make('id')
                     ->label('ID')
                     ->sortable(),
-                TextColumn::make('bank_code')
-                    ->label('Banco')
-                    ->formatStateUsing(function ($state) {
-                        // Buscar el enum correspondiente al código del banco
-                        $bank = collect(BankEnum::cases())
-                            ->first(fn ($bank) => $bank->code() === $state);
 
-                        return $bank?->getLabel() ?? 'Desconocido';
-                    }),
-                TextColumn::make('phone_number')
+                Tables\Columns\TextColumn::make('bank_code')
+                    ->label('Banco'),
+
+                Tables\Columns\TextColumn::make('phone_number')
                     ->label('Número de teléfono'),
-                TextColumn::make('identity_number')
-                    ->label('Número de identidad'),
+
+                Tables\Columns\TextColumn::make('identity_document')
+                    ->label('Documento de identidad'),
+
                 Tables\Columns\IconColumn::make('default_account')
-                    ->label('Publicado')
+                    ->label('Predeterminado')
                     ->boolean(),
-                TextColumn::make('created_at')
+
+                Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')
                     ->dateTime('d/m/Y'),
             ])

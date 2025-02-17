@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rule;
 
 class UserResource extends Resource
 {
@@ -48,7 +49,14 @@ class UserResource extends Resource
                     ->required(),
 
                 Inputs\IdentityNumberInput::make()
-                    ->required(),
+                    ->required()
+                    ->rules(function (Forms\Get $get) {
+                        return [
+                            Rule::unique('users', 'identity_number')->where(function ($query) use ($get) {
+                                return $query->where('identity_prefix', $get('identity_prefix'));
+                            }),
+                        ];
+                    }),
 
                 Forms\Components\DatePicker::make('birth_date')
                     ->label('Fecha de nacimiento'),

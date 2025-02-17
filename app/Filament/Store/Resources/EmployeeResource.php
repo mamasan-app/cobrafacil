@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rule;
 
 class EmployeeResource extends Resource
 {
@@ -50,7 +51,14 @@ class EmployeeResource extends Resource
                     ->required(),
 
                 Inputs\IdentityNumberInput::make()
-                    ->required(),
+                    ->required()
+                    ->rules(function (Forms\Get $get) {
+                        return [
+                            Rule::unique('users', 'identity_number')->where(function ($query) use ($get) {
+                                return $query->where('identity_prefix', $get('identity_prefix'));
+                            }),
+                        ];
+                    }),
 
                 Forms\Components\Select::make('stores')
                     ->label('Tiendas')
