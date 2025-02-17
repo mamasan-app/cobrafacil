@@ -7,6 +7,7 @@ use App\Enums\PhonePrefixEnum;
 use App\Filament\Inputs;
 use App\Models\Store;
 use App\Models\User;
+use Filament\Forms;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class UserRegister extends FilamentRegister
@@ -105,7 +107,14 @@ class UserRegister extends FilamentRegister
                                 ->required(),
 
                             Inputs\IdentityNumberInput::make()
-                                ->required(),
+                                ->required()
+                                ->rules(function (Forms\Get $get) {
+                                    return [
+                                        Rule::unique('users', 'identity_number')->where(function ($query) use ($get) {
+                                            return $query->where('identity_prefix', $get('identity_prefix'));
+                                        }),
+                                    ];
+                                }),
 
                             DatePicker::make('birth_date')
                                 ->label('Fecha de Nacimiento')

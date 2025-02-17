@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\BankEnum;
+use App\Enums\IdentityPrefixEnum;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +23,8 @@ class BankAccountFactory extends Factory
         return [
             'bank_code' => BankEnum::all()->random()->code(),
             'phone_number' => '+58412'.fake()->randomNumber(7),
-            'identity_number' => 'V'.fake()->randomNumber(8),
+            'identity_prefix' => fake()->randomElement(IdentityPrefixEnum::all()->toArray()),
+            'identity_number' => fake()->randomNumber(8),
             'default_account' => true,
             'store_id' => Store::factory(),
             'user_id' => User::factory(),

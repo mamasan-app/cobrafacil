@@ -4,6 +4,7 @@ namespace App\Filament\Store\Resources;
 
 use App\Filament\Inputs;
 use App\Filament\Store\Resources\CustomerResource\Pages;
+use App\Filament\Store\Resources\CustomerResource\RelationManagers\BankAccountsRelationManager;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -11,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rule;
 
 class CustomerResource extends Resource
 {
@@ -79,7 +81,14 @@ class CustomerResource extends Resource
 
                         Inputs\IdentityNumberInput::make()
                             ->required()
-                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields'))
+                            ->rules(function (Forms\Get $get) {
+                                return [
+                                    Rule::unique('users', 'identity_number')->where(function ($query) use ($get) {
+                                        return $query->where('identity_prefix', $get('identity_prefix'));
+                                    }),
+                                ];
+                            }),
 
                         Forms\Components\DatePicker::make('birth_date')
                             ->label('Fecha de Nacimiento')
@@ -158,7 +167,7 @@ class CustomerResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            BankAccountsRelationManager::class,
         ];
     }
 

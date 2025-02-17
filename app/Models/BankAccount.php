@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\BankEnum;
+use App\Enums\IdentityPrefixEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,22 +12,33 @@ class BankAccount extends Model
 {
     use HasFactory;
 
-    /**
-     * La tabla asociada al modelo.
-     */
     protected $table = 'bank_accounts';
 
-    /**
-     * Los atributos que se pueden asignar de forma masiva.
-     */
     protected $fillable = [
         'user_id',
-        'store_id', // Nuevo atributo
+        'store_id',
         'bank_code',
         'phone_number',
+        'identity_prefix',
         'identity_number',
-        'default_account', // Nuevo atributo
+        'default_account',
     ];
+
+    protected $casts = [
+        'identity_prefix' => IdentityPrefixEnum::class,
+        'bank_code' => BankEnum::class,
+    ];
+
+    protected $appends = [
+        'identity_document',
+    ];
+
+    public function identityDocument(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => "{$this->identity_prefix->value}-{$this->identity_number}",
+        );
+    }
 
     /**
      * Relación: Una cuenta bancaria pertenece a un usuario.
