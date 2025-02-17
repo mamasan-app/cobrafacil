@@ -24,7 +24,7 @@ class DevelopmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::create([
+        $admin = User::factory()->create([
             'first_name' => 'admin',
             'last_name' => 'admin',
             'email' => 'admin@cobrafacil.app',
@@ -39,14 +39,14 @@ class DevelopmentSeeder extends Seeder
         ]);
         $owner->assignRole('owner_store');
 
-        $customer = User::create([
+        $customer = User::factory()->create([
             'first_name' => 'customer',
             'last_name' => 'customer',
             'email' => 'customer@cobrafacil.app',
         ]);
         $customer->assignRole('customer');
 
-        $employee = User::create([
+        $employee = User::factory()->create([
             'first_name' => 'employee',
             'last_name' => 'employee',
             'email' => 'employee@cobrafacil.app',

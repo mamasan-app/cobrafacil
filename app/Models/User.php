@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\IdentityPrefixEnum;
 use App\Notifications\CustomVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
@@ -31,7 +32,8 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
         'first_name',
         'last_name',
         'phone_number',
-        'identity_document',
+        'identity_prefix',
+        'identity_number',
         'email',
         'password',
         'birth_date',
@@ -52,6 +54,10 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
         'remember_token',
     ];
 
+    protected $appends = [
+        'identity_document',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -60,6 +66,7 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
     protected function casts(): array
     {
         return [
+            'identity_prefix' => IdentityPrefixEnum::class,
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
@@ -69,7 +76,6 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
     {
         parent::boot();
 
-        // Asignar un código numérico de 8 dígitos a la columna 'code' antes de crear el usuario
         static::creating(function ($user) {
             if (empty($user->code)) {
                 $user->code = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
@@ -84,28 +90,29 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
         );
     }
 
+    public function identityDocument(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => "{$this->identity_prefix->value}-{$this->identity_number}",
+        );
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         $panelId = $panel->getId();
 
-        // dd($panelId, auth()->user()->roles->pluck('name'));
-
-        // Lógica para el panel de admin
         if ($panelId === 'admin') {
             return $this->hasRole('admin');
         }
 
-        // Lógica para el panel de app
         if ($panelId === 'app') {
             return $this->hasRole('customer');
         }
 
-        // Lógica para el panel de owner_store
         if ($panelId === 'store') {
             return $this->hasRole('owner_store') || $this->hasRole('employee');
         }
 
-        // Retorna false por defecto si no coincide con ninguno de los paneles
         return false;
     }
 
@@ -124,14 +131,12 @@ class User extends Authenticatable implements CanUsePasswordlessAuthenticatable,
             ->withTimestamps();
     }
 
-    // Obtener tiendas donde el usuario es 'employee'
-    public function employeeStores()
+    public function storesAsEmployee()
     {
         return $this->stores()->wherePivot('role', 'employee');
     }
 
-    // Obtener tiendas donde el usuario es 'customer'
-    public function customerStores()
+    public function storesAsCustomer()
     {
         return $this->stores()->wherePivot('role', 'customer');
     }

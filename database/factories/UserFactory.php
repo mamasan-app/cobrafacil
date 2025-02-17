@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\IdentityPrefixEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -30,7 +31,8 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'phone_number' => '+58424'.fake()->bothify('#######'),
-            'identity_document' => 'V-'.fake()->numberBetween(10_000_000, 40_000_000),
+            'identity_prefix' => fake()->randomElement(IdentityPrefixEnum::all()->toArray()),
+            'identity_number' => fake()->numberBetween(10_000_000, 40_000_000),
             'password' => static::$password ??= Hash::make('password'),
             'birth_date' => fake()->dateTimeBetween('-30 years, -20 years'),
             'address' => fake()->address(),

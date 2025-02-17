@@ -4,7 +4,7 @@ namespace App\Filament\Pages\Auth;
 
 use App\Enums\BankEnum;
 use App\Enums\PhonePrefixEnum;
-use App\Filament\Inputs\IdentityDocumentTextInput;
+use App\Filament\Inputs;
 use App\Models\Store;
 use App\Models\User;
 use Filament\Forms\Components\Checkbox;
@@ -101,7 +101,11 @@ class UserRegister extends FilamentRegister
                     Wizard\Step::make('Información Representante Legal')
                         ->columns(2)
                         ->schema([
-                            IdentityDocumentTextInput::make(),
+                            Inputs\IdentityPrefixSelect::make()
+                                ->required(),
+
+                            Inputs\IdentityNumberInput::make()
+                                ->required(),
 
                             DatePicker::make('birth_date')
                                 ->label('Fecha de Nacimiento')

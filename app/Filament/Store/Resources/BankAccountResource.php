@@ -4,7 +4,7 @@ namespace App\Filament\Store\Resources;
 
 use App\Enums\BankEnum;
 use App\Enums\PhonePrefixEnum;
-use App\Filament\Inputs\IdentityDocumentTextInput;
+use App\Filament\Inputs;
 use App\Filament\Store\Resources\BankAccountResource\Pages;
 use App\Models\BankAccount;
 use Filament\Facades\Filament;
@@ -57,7 +57,12 @@ class BankAccountResource extends Resource
                     ->label('Predeterminada')
                     ->required(),
 
-                IdentityDocumentTextInput::make('identity_prefix', 'identity_number'),
+                Inputs\IdentityPrefixSelect::make()
+                    ->required(),
+
+                Inputs\IdentityNumberInput::make()
+                    ->required(),
+
             ]);
     }
 
