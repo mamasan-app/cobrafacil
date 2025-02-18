@@ -6,11 +6,10 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\SubscriptionStatusEnum;
 use App\Jobs\SendSubscriptionReminderEmail;
 use App\Models\Payment;
-use App\Models\Subscription;
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Models\Subscription;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class ProcessSubscriptionReminders extends Command
@@ -50,8 +49,9 @@ class ProcessSubscriptionReminders extends Command
         }
 
         foreach ($subscriptions as $subscription) {
-            if (!$subscription->hasBsPayment()) {
+            if (! $subscription->hasBsPayment()) {
                 $this->info("La suscripción ID: {$subscription->id} no tiene pagos en Bs, se omite del proceso.");
+
                 continue;
             }
 
@@ -62,8 +62,9 @@ class ProcessSubscriptionReminders extends Command
                 Log::info("Plan encontrado para la suscripción ID: {$subscription->id}");
 
                 // Si el plan no es infinito y la suscripción está en su último ciclo, omitir
-                if (!$plan->infinite_duration && $subscription->renews_at->equalTo($subscription->ends_at)) {
+                if (! $plan->infinite_duration && $subscription->renews_at->equalTo($subscription->ends_at)) {
                     $this->info("La suscripción ID: {$subscription->id} está en su último ciclo y no se renovará.");
+
                     continue;
                 }
             } else {
@@ -75,7 +76,7 @@ class ProcessSubscriptionReminders extends Command
                 ->where('status', PaymentStatusEnum::Pending)
                 ->exists();
 
-            if (!$existingPayment) {
+            if (! $existingPayment) {
                 Payment::create([
                     'subscription_id' => $subscription->id,
                     'status' => PaymentStatusEnum::Pending,
