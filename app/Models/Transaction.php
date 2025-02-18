@@ -26,7 +26,7 @@ class Transaction extends Model
         'amount_cents',
         'metadata',
         'payment_id',
-        'stripe_payment_id', // Nuevo campo agregado
+        'stripe_payment_id',
         'stripe_invoice_id',
         'is_bs',
     ];

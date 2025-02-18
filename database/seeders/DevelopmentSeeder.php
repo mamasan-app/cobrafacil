@@ -2,11 +2,17 @@
 
 namespace Database\Seeders;
 
+use App\Enums\PaymentStatusEnum;
+use App\Enums\TransactionStatusEnum;
+use App\Enums\TransactionTypeEnum;
 use App\Models\Address;
 use App\Models\BankAccount;
 use App\Models\Frequency;
+use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Store;
+use App\Models\Subscription;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -14,9 +20,12 @@ class DevelopmentSeeder extends Seeder
 {
     protected array $frequencies;
 
+    protected ?Subscription $subscription;
+
     public function __construct()
     {
         $this->frequencies = [];
+        $this->subscription = null;
     }
 
     /**
@@ -87,9 +96,11 @@ class DevelopmentSeeder extends Seeder
 
         $this->makeFrequencies();
         $this->makeStorePlans($store);
+        $this->makeSubscriptions($store);
+        $this->makeTransactions($store);
     }
 
-    public function makeFrequencies()
+    public function makeFrequencies(): void
     {
         $this->frequencies[] = Frequency::create(['name' => 'Diaria', 'days_count' => 1]);
         $this->frequencies[] = Frequency::create(['name' => 'Semanal', 'days_count' => 7]);
@@ -97,9 +108,29 @@ class DevelopmentSeeder extends Seeder
         $this->frequencies[] = Frequency::create(['name' => 'Anual', 'days_count' => 365]);
     }
 
-    public function makeStorePlans(Store $store)
+    public function makeSubscriptions(Store $store): void
     {
-        Plan::create([
+        $customer = User::whereEmail('customer@cobrafacil.app')->first();
+        $plan = Plan::where('name', 'Prueba')->first();
+
+        $this->subscription = Subscription::factory()->create([
+            'user_id' => $customer->id,
+            'store_id' => $store->id,
+            'service_id' => $plan->id,
+            'service_name' => $plan->name,
+            'service_description' => $plan->description,
+            'service_price_cents' => $plan->price_cents,
+            'status' => 'active',
+            'trial_ends_at' => now()->addDays(30),
+            'renews_at' => now()->addDays(365),
+            'expires_at' => now()->addDays(375),
+            'frequency_days' => $plan->frequency->days_count,
+        ]);
+    }
+
+    public function makeStorePlans(Store $store): void
+    {
+        Plan::factory()->create([
             'name' => 'Plan Critico',
             'description' => 'Acceso limitado a funciones básicas.',
             'price_cents' => 1000,
@@ -113,7 +144,7 @@ class DevelopmentSeeder extends Seeder
             'duration' => 6,
         ]);
 
-        Plan::create([
+        Plan::factory()->create([
             'name' => 'Plan Básico',
             'description' => 'Acceso limitado a funciones básicas.',
             'price_cents' => 5000,
@@ -127,7 +158,7 @@ class DevelopmentSeeder extends Seeder
             'duration' => 14,
         ]);
 
-        Plan::create([
+        Plan::factory()->create([
             'name' => 'Plan Pro',
             'description' => 'Acceso completo a todas las funciones.',
             'price_cents' => 15000,
@@ -140,7 +171,7 @@ class DevelopmentSeeder extends Seeder
             'infinite_duration' => true,
         ]);
 
-        Plan::create([
+        Plan::factory()->create([
             'name' => 'Plan Premium',
             'description' => 'Acceso completo con soporte prioritario.',
             'price_cents' => 100000,
@@ -153,7 +184,7 @@ class DevelopmentSeeder extends Seeder
             'infinite_duration' => true,
         ]);
 
-        Plan::create([
+        Plan::factory()->create([
             'name' => 'Prueba',
             'description' => 'Acceso completo con soporte prioritario.',
             'price_cents' => 10,
@@ -164,6 +195,42 @@ class DevelopmentSeeder extends Seeder
             'free_days' => 30,
             'grace_period' => 10,
             'infinite_duration' => true,
+        ]);
+    }
+
+    public function makeTransactions(Store $store): void
+    {
+        $customer = User::whereEmail('customer@cobrafacil.app')->first();
+
+        $approvedPayment = Payment::factory()->create([
+            'subscription_id' => $this->subscription->id,
+            'status' => PaymentStatusEnum::Completed,
+            'amount_cents' => $this->subscription->service_price_cents,
+            'due_date' => now()->subDays(10),
+            'paid_date' => now()->subDays(5),
+            'is_bs' => true,
+            'paid' => true,
+        ]);
+
+        Transaction::factory()
+            ->fromUserToStore($customer, $store)
+            ->create([
+                'type' => TransactionTypeEnum::Subscription->value,
+                'status' => TransactionStatusEnum::Succeeded,
+                'date' => now()->subDays(5),
+                'amount_cents' => $approvedPayment->amount_cents,
+                'metadata' => ['reference' => 'TRANS123456'],
+                'payment_id' => $approvedPayment->id,
+                'is_bs' => true,
+            ]);
+
+        Payment::factory()->create([
+            'subscription_id' => $this->subscription->id,
+            'status' => PaymentStatusEnum::Pending,
+            'amount_cents' => $this->subscription->service_price_cents,
+            'due_date' => now()->addDays(5),
+            'is_bs' => true,
+            'paid' => false,
         ]);
     }
 }

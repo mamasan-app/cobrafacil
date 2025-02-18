@@ -187,4 +187,9 @@ class Subscription extends Model
             get: fn () => $this->payments->flatMap->transactions
         );
     }
+
+    public function hasBsPayment(): bool
+    {
+        return $this->payments()->where('is_bs', true)->exists();
+    }
 }

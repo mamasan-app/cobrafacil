@@ -2,6 +2,7 @@
 
 namespace App\Filament\App\Resources\PaymentResource\Widgets;
 
+use App\Enums\TransactionTypeEnum;
 use App\Models\Transaction;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -61,8 +62,9 @@ class TransactionsWidget extends BaseWidget
 
     protected function getQuery()
     {
-        // Recupera todas las transacciones relacionadas con el pago actual
+        // Recupera todas las transacciones relacionadas con el pago actual y que sean de tipo "subscription"
         return Transaction::query()
-            ->where('payment_id', $this->record->id);
+            ->where('payment_id', $this->record->id)
+            ->where('type', TransactionTypeEnum::Subscription->value); // Filtrar solo suscripciones
     }
 }

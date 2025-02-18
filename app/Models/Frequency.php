@@ -9,7 +9,5 @@ class Frequency extends Model
 {
     use HasFactory;
 
-    protected $table = 'frequencies';
-
-    protected $fillable = ['nombre', 'cantidad_dias', 'activo'];
+    protected $fillable = ['name', 'days_count', 'active'];
 }

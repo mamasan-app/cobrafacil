@@ -21,9 +21,9 @@ class BankAccountFactory extends Factory
     public function definition(): array
     {
         return [
-            'bank_code' => BankEnum::all()->random()->code(),
+            'bank_code' => fake()->randomElement(BankEnum::cases()),
             'phone_number' => '+58412'.fake()->randomNumber(7),
-            'identity_prefix' => fake()->randomElement(IdentityPrefixEnum::all()->toArray()),
+            'identity_prefix' => fake()->randomElement(IdentityPrefixEnum::cases()),
             'identity_number' => fake()->randomNumber(8),
             'default_account' => true,
             'store_id' => Store::factory(),

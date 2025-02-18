@@ -6,8 +6,10 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\SubscriptionStatusEnum;
 use App\Jobs\SendSubscriptionReminderEmail;
 use App\Models\Payment;
+use App\Models\Plan;
 use App\Models\Subscription;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class ProcessSubscriptionReminders extends Command
 {
@@ -46,14 +48,35 @@ class ProcessSubscriptionReminders extends Command
         }
 
         foreach ($subscriptions as $subscription) {
-            // Crear pago pendiente si no existe uno para este ciclo de facturación
+            if (! $subscription->hasBsPayment()) {
+                $this->info("La suscripción ID: {$subscription->id} no tiene pagos en Bs, se omite del proceso.");
+
+                continue;
+            }
+
+            // Obtener el plan asociado a la suscripción
+            $plan = Plan::find($subscription->service_id);
+
+            if ($plan) {
+                Log::info("Plan encontrado para la suscripción ID: {$subscription->id}");
+
+                // Si el plan no es infinito y la suscripción está en su último ciclo, omitir
+                if (! $plan->infinite_duration && $subscription->renews_at->equalTo($subscription->ends_at)) {
+                    $this->info("La suscripción ID: {$subscription->id} está en su último ciclo y no se renovará.");
+
+                    continue;
+                }
+            } else {
+                Log::warning("No se encontró el plan para la suscripción ID: {$subscription->id}");
+            }
+
+            // Verificar si ya hay pagos pendientes
             $existingPayment = Payment::where('subscription_id', $subscription->id)
                 ->where('status', PaymentStatusEnum::Pending)
-                ->whereBetween('due_date', [$today, $sevenDaysLater])
                 ->exists();
 
             if (! $existingPayment) {
-                $payment = Payment::create([
+                Payment::create([
                     'subscription_id' => $subscription->id,
                     'status' => PaymentStatusEnum::Pending,
                     'amount_cents' => $subscription->service_price_cents,
@@ -61,10 +84,10 @@ class ProcessSubscriptionReminders extends Command
                     'is_bs' => true,
                 ]);
 
-                $this->info("Pago pendiente creado para la suscripción ID: {$subscription->id} con monto: {$payment->amount_cents} centavos.");
+                $this->info("Pago pendiente creado para la suscripción ID: {$subscription->id}.");
             }
 
-            // Despachar el job de notificación
+            // Enviar notificación
             dispatch(new SendSubscriptionReminderEmail($subscription));
 
             $this->info("Recordatorio enviado a usuario con ID: {$subscription->user_id}");
