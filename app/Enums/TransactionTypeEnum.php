@@ -15,7 +15,7 @@ enum TransactionTypeEnum: string implements HasLabel
     {
         return match ($this) {
             self::Subscription => 'Subscripción',
-            self::Refund => 'Pagado',
+            self::Refund => 'Vuelto',
         };
     }
 }

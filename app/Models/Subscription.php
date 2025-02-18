@@ -61,7 +61,7 @@ class Subscription extends Model
     public function formattedServicePrice(): Attribute
     {
         return Attribute::make(
-            get: fn () => number_format($this->service_price_cents / 100, 2).' USD'
+            get: fn() => number_format($this->service_price_cents / 100, 2) . ' USD'
         );
     }
 
@@ -71,7 +71,7 @@ class Subscription extends Model
     public function frequencyDescription(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->frequency_days
+            get: fn() => $this->frequency_days
             ? "{$this->frequency_name} ({$this->frequency_days} días)"
             : null
         );
@@ -80,35 +80,35 @@ class Subscription extends Model
     public function isActive(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->status === SubscriptionStatusEnum::Active
+            get: fn() => $this->status === SubscriptionStatusEnum::Active
         );
     }
 
     public function isOnTrial(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->status === SubscriptionStatusEnum::OnTrial
+            get: fn() => $this->status === SubscriptionStatusEnum::OnTrial
         );
     }
 
     public function isPastDue(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->status === SubscriptionStatusEnum::PastDue
+            get: fn() => $this->status === SubscriptionStatusEnum::PastDue
         );
     }
 
     public function isCancelled(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->status === SubscriptionStatusEnum::Cancelled
+            get: fn() => $this->status === SubscriptionStatusEnum::Cancelled
         );
     }
 
     public function isExpired(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->status === SubscriptionStatusEnum::Expired
+            get: fn() => $this->status === SubscriptionStatusEnum::Expired
         );
     }
 
@@ -129,21 +129,21 @@ class Subscription extends Model
     public function hasEnded(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->ends_at->greaterThan(now())
+            get: fn() => $this->ends_at->greaterThan(now())
         );
     }
 
     public function wasNotifiedRecently(): Attribute
     {
         return Attribute::make(
-            get: fn () => abs(now()->diffInHours($this->last_notification_at)) <= 48
+            get: fn() => abs(now()->diffInHours($this->last_notification_at)) <= 48
         );
     }
 
     public function canBePaid(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! $this->is_on_trial && ! $this->is_expired && ! $this->is_cancelled
+            get: fn() => !$this->is_on_trial && !$this->is_expired && !$this->is_cancelled
         );
     }
 
@@ -184,7 +184,13 @@ class Subscription extends Model
     public function allTransactions(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->payments->flatMap->transactions
+            get: fn() => $this->payments->flatMap->transactions
         );
     }
+
+    public function hasBsPayment(): bool
+    {
+        return $this->payments()->where('is_bs', true)->exists();
+    }
+
 }
