@@ -10,12 +10,7 @@ class MagicLinkNotification extends Notification
 {
     use Queueable;
 
-    /**
-     * URL del enlace mágico para inicio de sesión.
-     *
-     * @var string
-     */
-    protected $magicLinkUrl;
+    protected string $magicLinkUrl;
 
     /**
      * Create a new notification instance.
@@ -41,7 +36,7 @@ class MagicLinkNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->subject('Enlace Mágico de Inicio de Sesión')
+            ->subject('Enlace de Inicio de Sesión')
             ->line('Haz clic en el siguiente enlace para iniciar sesión en tu cuenta.')
             ->action('Iniciar Sesión', $this->magicLinkUrl)
             ->line('Si no solicitaste este enlace, ignora este mensaje.');

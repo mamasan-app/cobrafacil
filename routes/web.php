@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\MagicLinkLoginController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
@@ -19,8 +18,6 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
             return redirect('/app');
     }
 })->middleware(['auth', 'signed'])->name('verification.verify');
-
-Route::get('/magiclink/send', [MagicLinkLoginController::class, 'sendMagicLink'])->name('magiclink.send');
 
 Route::get('/', function () {
     return inertia('WelcomePage');

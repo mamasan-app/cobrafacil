@@ -44,7 +44,7 @@ class UserLogin extends FilamentLogin
 
         Notification::make()
             ->title('¡Enlace enviado!')
-            ->body('Se ha enviado un enlace mágico a tu correo electrónico. Revisa tu bandeja de entrada para continuar.')
+            ->body('Se ha enviado un enlace de inicio de sesión a tu correo electrónico. Revisa tu bandeja de entrada para continuar.')
             ->success()
             ->send();
 
@@ -54,7 +54,7 @@ class UserLogin extends FilamentLogin
     protected function getAuthenticateFormAction(): \Filament\Actions\Action
     {
         return \Filament\Actions\Action::make('sendMagicLink')
-            ->label('Enviar Enlace Mágico')
+            ->label('Enviar Enlace')
             ->submit('authenticate');
     }
 

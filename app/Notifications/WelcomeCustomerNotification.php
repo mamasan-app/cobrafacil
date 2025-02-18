@@ -10,12 +10,7 @@ class WelcomeCustomerNotification extends Notification
 {
     use Queueable;
 
-    /**
-     * URL del enlace mágico para inicio de sesión.
-     *
-     * @var string
-     */
-    protected $magicLinkUrl;
+    protected string $magicLinkUrl;
 
     /**
      * Nombre de la tienda.

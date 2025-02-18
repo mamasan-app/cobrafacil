@@ -46,7 +46,7 @@ class CustomerResource extends Resource
                                     $createButton = $livewire->getAction('create');
 
                                     if ($userExists) {
-                                        $createButton->label('Enviar enlace de inicio de sesión');
+                                        $createButton->label('Enviar Enlace');
                                         $set('showAdditionalFields', false);
                                     } else {
                                         $createButton->label('Crear');
