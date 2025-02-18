@@ -3,12 +3,16 @@
 namespace App\Filament\App\Pages;
 
 use App\Enums\BankEnum;
+use App\Enums\PaymentStatusEnum;
 use App\Enums\PhonePrefixEnum;
 use App\Enums\SubscriptionStatusEnum;
-use App\Enums\PaymentStatusEnum;
+use App\Enums\TransactionStatusEnum;
+use App\Enums\TransactionTypeEnum;
+use App\Jobs\MonitorTransactionStatus;
+use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\Transaction;
-use App\Models\Payment;
+use Exception;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -16,33 +20,37 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Http;
-use App\Enums\TransactionStatusEnum;
-use App\Enums\TransactionTypeEnum;
-use App\Jobs\MonitorTransactionStatus;
-use Exception;
 
 class CreatePayment extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
     protected static ?string $navigationGroup = 'Gestión de Pagos';
+
     protected static string $view = 'filament.pages.subscription-payment';
+
     protected static ?string $title = 'Crear Pagos';
 
     public $subscription_id;
-    public $otp;
-    public $bank;
-    public $phone;
-    public $identity;
-    public $amountInBs;
-    public $payment;
-    public $subscription;
 
+    public $otp;
+
+    public $bank;
+
+    public $phone;
+
+    public $identity;
+
+    public $amountInBs;
+
+    public $payment;
+
+    public $subscription;
 
     public function mount(): void
     {
         $this->resetForm();
     }
-
 
     public function resetForm(): void
     {
@@ -70,11 +78,11 @@ class CreatePayment extends Page
                     })
                         ->whereNull('stripe_subscription_id')
                         ->get()
-                        ->mapWithKeys(fn($sub) => [$sub->id => "{$sub->id} - {$sub->service_name}"])
+                        ->mapWithKeys(fn ($sub) => [$sub->id => "{$sub->id} - {$sub->service_name}"])
                         ->toArray()
 
                 )
-                ->afterStateUpdated(fn($state) => $this->handleSubscriptionChange($state))
+                ->afterStateUpdated(fn ($state) => $this->handleSubscriptionChange($state))
                 ->required()
                 ->reactive(),
         ];
@@ -84,18 +92,19 @@ class CreatePayment extends Page
     {
         $this->subscription_id = $subscriptionId;
 
-        if (!$subscriptionId) {
+        if (! $subscriptionId) {
             return;
         }
 
         $this->subscription = Subscription::find($subscriptionId); // ✅ Guardar la suscripción
 
-        if (!$this->subscription) {
+        if (! $this->subscription) {
             Notification::make()
                 ->title('Error')
                 ->body('No se encontró la suscripción seleccionada.')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -104,6 +113,7 @@ class CreatePayment extends Page
                 'filament.app.resources.user-subscription-payment',
                 ['record' => $subscriptionId]
             );
+
             return;
         }
 
@@ -113,12 +123,13 @@ class CreatePayment extends Page
             ->where('is_bs', true)
             ->first();
 
-        if (!$this->payment) {
+        if (! $this->payment) {
             Notification::make()
                 ->title('Error')
                 ->body('No se encontró un pago pendiente en Bs para esta suscripción.')
                 ->danger()
                 ->send();
+
             return;
         }
 
@@ -145,7 +156,7 @@ class CreatePayment extends Page
                                 ->label('Banco')
                                 ->options(
                                     collect(BankEnum::cases())
-                                        ->mapWithKeys(fn($bank) => [$bank->code() => $bank->getLabel()])
+                                        ->mapWithKeys(fn ($bank) => [$bank->code() => $bank->getLabel()])
                                         ->toArray()
                                 )
                                 ->required(),
@@ -155,7 +166,7 @@ class CreatePayment extends Page
                                         ->label('Prefijo Telefónico')
                                         ->options(
                                             collect(PhonePrefixEnum::cases())
-                                                ->mapWithKeys(fn($prefix) => [$prefix->value => $prefix->getLabel()])
+                                                ->mapWithKeys(fn ($prefix) => [$prefix->value => $prefix->getLabel()])
                                                 ->toArray()
                                         )
                                         ->required(),
@@ -176,9 +187,9 @@ class CreatePayment extends Page
                             // Registrar la nueva cuenta
                             $newAccount = $user->bankAccounts()->create([
                                 'bank_code' => $data['bank'],
-                                'phone_number' => $data['phone_prefix'] . $data['phone_number'],
+                                'phone_number' => $data['phone_prefix'].$data['phone_number'],
                                 'identity_number' => str_replace('-', '', $user->identity_document),
-                                'default_account' => !$hasAccounts, // Si no tiene cuentas, esta es la predeterminada
+                                'default_account' => ! $hasAccounts, // Si no tiene cuentas, esta es la predeterminada
                             ]);
 
                             // Generar OTP para la nueva cuenta
@@ -188,7 +199,7 @@ class CreatePayment extends Page
                                 'identity' => $newAccount->identity_number,
                             ]);
                         })
-                        ->hidden(fn() => $this->otp !== null),
+                        ->hidden(fn () => $this->otp !== null),
 
                     // Botón para usar una cuenta existente
                     Action::make('useExistingAccount')
@@ -200,8 +211,8 @@ class CreatePayment extends Page
                                 ->options(
                                     auth()->user()->bankAccounts()
                                         ->get()
-                                        ->mapWithKeys(fn($account) => [
-                                            $account->id => "{$account->bank_code} - {$account->phone_number} - {$account->identity_number}" .
+                                        ->mapWithKeys(fn ($account) => [
+                                            $account->id => "{$account->bank_code} - {$account->phone_number} - {$account->identity_number}".
                                                 ($account->default_account ? ' (Predeterminada)' : ''),
                                         ])
                                         ->toArray()
@@ -226,7 +237,7 @@ class CreatePayment extends Page
                                 'identity' => $bankAccount->identity_number,
                             ]);
                         })
-                        ->hidden(fn() => $this->otp !== null),
+                        ->hidden(fn () => $this->otp !== null),
 
                     // Botón para confirmar OTP
                     Action::make('confirmOtp')
@@ -249,7 +260,7 @@ class CreatePayment extends Page
                                 'otp' => $this->otp,
                             ]);
                         })
-                        ->visible(fn() => $this->otp !== null),
+                        ->visible(fn () => $this->otp !== null),
                 ]),
         ];
     }
@@ -262,9 +273,9 @@ class CreatePayment extends Page
 
         try {
             $otpResponse = $this->generateOtp();
-            //dd($otpResponse);
+            // dd($otpResponse);
 
-            if (!isset($otpResponse['success']) || !$otpResponse['success']) {
+            if (! isset($otpResponse['success']) || ! $otpResponse['success']) {
                 Notification::make()
                     ->title('Error')
                     ->body('No se pudo generar el OTP. Intente nuevamente.')
@@ -315,12 +326,12 @@ class CreatePayment extends Page
             'Authorization' => $tokenAuthorization,
             'Commerce' => config('banking.commerce_id'), // Verificar este valor en la configuración
         ])->post(config('banking.otp_url'), [
-                    'Banco' => $bank, // Código del banco (4 dígitos)
-                    'Monto' => $amount, // Cadena con dos decimales
-                    'Telefono' => $phone, // Teléfono completo (11 dígitos)
-                    'Cedula' => $identity, // Cédula con prefijo
-                ]);
-        //dd('Respuesta de la API', $response->json());
+            'Banco' => $bank, // Código del banco (4 dígitos)
+            'Monto' => $amount, // Cadena con dos decimales
+            'Telefono' => $phone, // Teléfono completo (11 dígitos)
+            'Cedula' => $identity, // Cédula con prefijo
+        ]);
+        // dd('Respuesta de la API', $response->json());
 
         return $response->json();
     }
@@ -373,7 +384,7 @@ class CreatePayment extends Page
         $user = auth()->user(); // Obtener el usuario autenticado
         $store = $this->subscription ? $this->subscription->store : null;
 
-        if (!$store) {
+        if (! $store) {
             throw new Exception('No se pudo obtener la tienda de la suscripción.');
         }
 
@@ -397,14 +408,14 @@ class CreatePayment extends Page
             'Authorization' => $tokenAuthorization,
             'Commerce' => config('banking.commerce_id'),
         ])->post(config('banking.debit_url'), [
-                    'Banco' => $bank,
-                    'Monto' => $amount,
-                    'Telefono' => $phone,
-                    'Cedula' => $identity,
-                    'Nombre' => $nombre,
-                    'Concepto' => 'pago de suscripcion',
-                    'OTP' => $otp,
-                ]);
+            'Banco' => $bank,
+            'Monto' => $amount,
+            'Telefono' => $phone,
+            'Cedula' => $identity,
+            'Nombre' => $nombre,
+            'Concepto' => 'pago de suscripcion',
+            'OTP' => $otp,
+        ]);
 
         Transaction::create([
             'from_type' => get_class($user),
@@ -432,13 +443,13 @@ class CreatePayment extends Page
                 'Authorization' => $this->generateBcvToken(),
                 'Commerce' => config('banking.commerce_id'),
             ])->post(config('banking.tasa_bcv'), [
-                        'Moneda' => 'USD',
-                        'Fechavalor' => now()->format('Y-m-d'),
-                    ]);
+                'Moneda' => 'USD',
+                'Fechavalor' => now()->format('Y-m-d'),
+            ]);
 
             $rate = $response->json()['tipocambio'] ?? null;
 
-            //dd($response->json());
+            // dd($response->json());
 
             if ($rate) {
                 return round($amountInUSD * $rate, 2);
@@ -448,7 +459,7 @@ class CreatePayment extends Page
         } catch (\Exception $e) {
             Notification::make()
                 ->title('Error al obtener la tasa')
-                ->body('No se pudo obtener la tasa de cambio del BCV. Detalles: ' . $e->getMessage())
+                ->body('No se pudo obtener la tasa de cambio del BCV. Detalles: '.$e->getMessage())
                 ->danger()
                 ->send();
 
@@ -458,9 +469,8 @@ class CreatePayment extends Page
 
     protected function generateBcvToken()
     {
-        $data = now()->format('Y-m-d') . 'USD';
+        $data = now()->format('Y-m-d').'USD';
 
         return hash_hmac('sha256', $data, config('banking.commerce_id'));
     }
-
 }

@@ -6,7 +6,6 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\SubscriptionStatusEnum;
 use App\Jobs\SendSubscriptionReminderEmail;
 use App\Models\Payment;
-use App\Models\Payment;
 use App\Models\Plan;
 use App\Models\Subscription;
 use Illuminate\Console\Command;
