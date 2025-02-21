@@ -26,7 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'code' => fake()->bothify('########'),
-            'first_name' => fake()->name(),
+            'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
@@ -34,7 +34,7 @@ class UserFactory extends Factory
             'identity_prefix' => fake()->randomElement(IdentityPrefixEnum::all()->toArray()),
             'identity_number' => fake()->numberBetween(10_000_000, 40_000_000),
             'password' => static::$password ??= Hash::make('password'),
-            'birth_date' => fake()->dateTimeBetween('-30 years, -20 years'),
+            'birth_date' => $this->faker->date(),
             'address' => fake()->address(),
             'selfie_path' => null,
             'ci_picture_path' => null,
