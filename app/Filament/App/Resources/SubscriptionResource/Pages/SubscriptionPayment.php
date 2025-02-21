@@ -408,7 +408,7 @@ class SubscriptionPayment extends Page
                             $this->submitBolivaresPayment([
                                 'bank' => $newAccount->bank_code,
                                 'phone' => $newAccount->phone_number,
-                                'identity' => $newAccount->identity_number,
+                                'identity' => str_replace('-', '', $newAccount->identity_document),
                             ]);
                         })
                         ->hidden(fn () => $this->otp !== null), // Ocultar este botón si el OTP fue generado.
@@ -446,7 +446,7 @@ class SubscriptionPayment extends Page
                             $this->submitBolivaresPayment([
                                 'bank' => $bankAccount->bank_code,
                                 'phone' => $bankAccount->phone_number,
-                                'identity' => $bankAccount->identity_number,
+                                'identity' => str_replace('-', '', $bankAccount->identity_document),
                             ]);
                         })
                         ->hidden(fn () => $this->otp !== null), // Ocultar este botón si el OTP fue generado.
