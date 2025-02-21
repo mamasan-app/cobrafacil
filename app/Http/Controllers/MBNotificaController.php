@@ -49,7 +49,7 @@ class MBNotificaController extends Controller
         Log::info('Código de banco ajustado', ['codigoBanco' => $codigoBanco]);
 
         // Validar el código del banco usando el enum BankEnum
-        $bancoValido = collect(BankEnum::cases())->first(fn ($enum) => $enum->code() === $codigoBanco);
+        $bancoValido = collect(BankEnum::cases())->first(fn ($enum) => $enum->value === $codigoBanco);
         if (! $bancoValido) {
             Log::warning('Código de banco inválido', ['BancoEmisor' => $codigoBanco]);
 
