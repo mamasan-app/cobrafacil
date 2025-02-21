@@ -56,9 +56,6 @@ class AppPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->resources([
-                \App\Filament\App\Resources\UserSubscriptionResource::class,
-            ])
             ->plugins([
                 FilamentFullCalendarPlugin::make() // Registra el plugin del calendario
                     ->timezone('UTC') // Establecer la zona horaria

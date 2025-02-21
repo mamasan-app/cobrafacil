@@ -4,16 +4,16 @@ namespace App\Filament\App\Pages;
 
 use App\Enums\BankEnum;
 use App\Enums\PaymentStatusEnum;
-use App\Enums\PhonePrefixEnum;
 use App\Enums\SubscriptionStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
+use App\Filament\Inputs;
 use App\Jobs\MonitorTransactionStatus;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use Exception;
-use Filament\Forms\Components\Grid;
+use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -150,33 +150,23 @@ class CreatePayment extends Page
                     // Botón para registrar una nueva cuenta
                     Action::make('registerAccount')
                         ->label('Registrar cuenta y enviar')
-                        ->color('secondary')
+                        ->color('gray')
                         ->form([
-                            Select::make('bank')
+                            Forms\Components\Select::make('bank_code')
                                 ->label('Banco')
-                                ->options(
-                                    collect(BankEnum::cases())
-                                        ->mapWithKeys(fn ($bank) => [$bank->code() => $bank->getLabel()])
-                                        ->toArray()
-                                )
+                                ->options(BankEnum::class)
+                                ->searchable()
                                 ->required(),
-                            Grid::make(2)
-                                ->schema([
-                                    Select::make('phone_prefix')
-                                        ->label('Prefijo Telefónico')
-                                        ->options(
-                                            collect(PhonePrefixEnum::cases())
-                                                ->mapWithKeys(fn ($prefix) => [$prefix->value => $prefix->getLabel()])
-                                                ->toArray()
-                                        )
-                                        ->required(),
-                                    TextInput::make('phone_number')
-                                        ->label('Número Telefónico')
-                                        ->numeric()
-                                        ->minLength(7)
-                                        ->maxLength(7)
-                                        ->required(),
-                                ]),
+
+                            Inputs\PhoneNumberInput::make()
+                                ->label('Número de teléfono')
+                                ->required(),
+
+                            Inputs\IdentityPrefixSelect::make()
+                                ->required(),
+
+                            Inputs\IdentityNumberInput::make()
+                                ->required(),
                         ])
                         ->action(function (array $data) {
                             $user = auth()->user();
@@ -187,9 +177,10 @@ class CreatePayment extends Page
                             // Registrar la nueva cuenta
                             $newAccount = $user->bankAccounts()->create([
                                 'bank_code' => $data['bank'],
-                                'phone_number' => $data['phone_prefix'].$data['phone_number'],
-                                'identity_number' => str_replace('-', '', $user->identity_document),
-                                'default_account' => ! $hasAccounts, // Si no tiene cuentas, esta es la predeterminada
+                                'phone_number' => $data['phone_number'],
+                                'identity_prefix' => $data['identity_prefix'],
+                                'identity_number' => $data['identity_number'],
+                                'default_account' => ! $hasAccounts,
                             ]);
 
                             // Generar OTP para la nueva cuenta
@@ -212,7 +203,7 @@ class CreatePayment extends Page
                                     auth()->user()->bankAccounts()
                                         ->get()
                                         ->mapWithKeys(fn ($account) => [
-                                            $account->id => "{$account->bank_code} - {$account->phone_number} - {$account->identity_number}".
+                                            $account->id => "{$account->bank_code->value} - {$account->phone_number} - {$account->identity_number}".
                                                 ($account->default_account ? ' (Predeterminada)' : ''),
                                         ])
                                         ->toArray()
@@ -223,6 +214,7 @@ class CreatePayment extends Page
                                         ->first()?->id
                                 )
                                 ->required(),
+
                             TextInput::make('amountInBs')
                                 ->label('Monto en Bolívares')
                                 ->default($this->amountInBs)
@@ -304,7 +296,7 @@ class CreatePayment extends Page
     protected function generateOtp()
     {
         // Transformar todos los valores a string
-        $bank = (string) $this->bank;
+        $bank = $this->bank->value;
         $amount = (string) number_format((float) $this->amountInBs, 2, '.', ''); // Convertir a string con dos decimales
         $phone = (string) $this->phone;
         $identity = (string) $this->identity;
@@ -389,7 +381,7 @@ class CreatePayment extends Page
         }
 
         $nombre = $user->name ?? "{$user->first_name} {$user->last_name}"; // Obtener el nombre completo
-        $bank = (string) $this->bank;
+        $bank = $this->bank->value;
         $amount = (string) number_format((float) $this->amountInBs, 2, '.', ''); // Convertir a string con dos decimales
         $phone = (string) $this->phone;
         $identity = (string) $this->identity;

@@ -5,6 +5,7 @@ namespace App\Filament\App\Resources\StoreResource\Pages;
 use App\Filament\App\Resources\StoreResource;
 use App\Filament\App\Resources\StoreResource\Widgets\StorePlansWidget;
 use App\Filament\App\Resources\StoreResource\Widgets\StoreSubscriptionsWidget;
+use App\Filament\App\Resources\SubscriptionResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -30,7 +31,7 @@ class ViewStore extends ViewRecord
     {
         return [
             Actions\Action::make('Crear Suscripción')
-                ->url(fn () => \App\Filament\App\Resources\UserSubscriptionResource::getUrl('create', [
+                ->url(fn () => SubscriptionResource::getUrl('create', [
                     'store_id' => $this->record->id,
                 ]))
                 ->color('primary')

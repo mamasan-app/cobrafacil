@@ -13,7 +13,6 @@ use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -27,7 +26,7 @@ class StoreResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false; // No permite crear nuevas tiendas desde el panel
+        return false;
     }
 
     public static function form(Form $form): Form
@@ -42,9 +41,16 @@ class StoreResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label('Nombre'),
-                TextColumn::make('description')->label('Descripción')->placeholder('No disponible'),
-                TextColumn::make('owner.name')->label('Propietario')->placeholder('No disponible'),
+                TextColumn::make('name')
+                    ->label('Nombre'),
+
+                TextColumn::make('description')
+                    ->label('Descripción')
+                    ->placeholder('No disponible'),
+
+                TextColumn::make('owner.name')
+                    ->label('Propietario')
+                    ->placeholder('No disponible'),
             ])
             ->filters([
                 //
@@ -53,9 +59,9 @@ class StoreResource extends Resource
                 //
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
@@ -71,6 +77,7 @@ class StoreResource extends Resource
                                     ->label('Logo')
                                     ->circular()
                                     ->placeholder('No disponible'),
+
                                 Group::make()
                                     ->columnSpan(2)
                                     ->columns(2)
@@ -78,18 +85,12 @@ class StoreResource extends Resource
                                         TextEntry::make('name')
                                             ->label('Nombre de la Tienda')
                                             ->placeholder('No disponible'),
-                                        TextEntry::make('url')
-                                            ->label('URL')
-                                            ->url(fn ($record) => $record->url)
-                                            ->placeholder('No disponible'),
-                                        TextEntry::make('slug')
-                                            ->label('Slug')
-                                            ->placeholder('No disponible'),
+
                                         TextEntry::make('verified')
                                             ->label('Verificada')
-                                            ->getStateUsing(fn ($record) => $record->verified ? 'Sí' : 'No')
+                                            ->formatStateUsing(fn ($record) => $record->verified ? 'Sí' : 'No')
                                             ->badge()
-                                            ->color(fn ($state) => $state === 'Sí' ? 'success' : 'danger'),
+                                            ->color(fn ($record) => $record->verified ? 'success' : 'danger'),
                                     ]),
                             ])->columnSpanFull(),
 
@@ -106,7 +107,7 @@ class StoreResource extends Resource
                                             ->placeholder('No disponible'),
                                     ])
                                     ->columnSpanFull()
-                                    ->grid(2), // Mostrará las direcciones en un diseño de dos columnas
+                                    ->grid(2),
                             ])->columnSpanFull(),
                     ])->columnSpanFull(),
             ]);

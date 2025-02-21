@@ -18,7 +18,7 @@ class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
 
     protected static ?string $navigationGroup = 'Gestión de Pagos';
 
@@ -78,22 +78,28 @@ class TransactionResource extends Resource
                             ->schema([
                                 TextEntry::make('id')
                                     ->label('ID de Transacción'),
+
                                 TextEntry::make('type')
                                     ->label('Tipo de Transacción')
                                     ->getStateUsing(fn ($record) => $record->type->getLabel()),
+
                                 TextEntry::make('status')
                                     ->label('Estado')
                                     ->badge()
                                     ->color(fn ($record) => $record->status->getColor()),
+
                                 TextEntry::make('date')
                                     ->label('Fecha de Transacción')
-                                    ->dateTime('d/m/Y'),
+                                    ->dateTime('d/m/Y', 'America/Caracas'),
+
                                 TextEntry::make('amount')
                                     ->label('Monto (USD)')
                                     ->getStateUsing(fn ($record) => number_format($record->amount, 2).' USD'),
+
                                 TextEntry::make('from_user_name')
                                     ->label('Usuario (From)')
                                     ->getStateUsing(fn ($record) => $record->from->name ?? 'No disponible'),
+
                                 TextEntry::make('to_name')
                                     ->label('Destino (To)')
                                     ->getStateUsing(function ($record) {
@@ -160,7 +166,7 @@ class TransactionResource extends Resource
                                     ->placeholder('No disponible'),
                                 TextEntry::make('paid_date')
                                     ->label('Fecha de Pago')
-                                    ->dateTime('d/m/Y')
+                                    ->dateTime('d/m/Y', 'America/Caracas')
                                     ->placeholder('No disponible'),
                             ])->columns(2),
                     ])->columnSpanFull(),
