@@ -41,7 +41,10 @@ class Plan extends Model
         'duration' => 'integer',
     ];
 
-    protected $appends = ['price', 'duration_text']; // Esto crea un campo virtual 'price' en las salidas JSON
+    protected $appends = [
+        'price',
+        'duration_text',
+    ];
 
     /**
      * Atributo calculado para el precio en formato decimal.
