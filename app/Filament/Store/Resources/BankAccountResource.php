@@ -18,13 +18,19 @@ class BankAccountResource extends Resource
 {
     protected static ?string $model = BankAccount::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $modelLabel = 'Cuenta Bancaria';
+
+    protected static ?string $pluralModelLabel = 'Cuentas Bancarias';
+
+    protected static ?string $navigationGroup = 'Gestión de Pagos';
+
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Cuenta Bancaria')
+                Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\Select::make('bank_code')
                             ->label('Banco')
@@ -73,7 +79,7 @@ class BankAccountResource extends Resource
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Creado')
-                    ->dateTime('d/m/Y'),
+                    ->dateTime('d/m/Y', 'America/Caracas'),
             ])
             ->filters([
                 //

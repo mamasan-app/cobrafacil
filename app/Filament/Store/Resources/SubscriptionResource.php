@@ -18,9 +18,11 @@ class SubscriptionResource extends Resource
 {
     protected static ?string $model = Subscription::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-star';
 
-    protected static ?string $modelLabel = 'Suscripciones';
+    protected static ?string $modelLabel = 'Suscripción';
+
+    protected static ?string $pluralModelLabel = 'Suscripciones';
 
     /**
      * Define el formulario para crear/editar suscripciones.
@@ -76,7 +78,7 @@ class SubscriptionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(static::getTableQuery()) // Filtrar suscripciones por tienda actual
+            ->query(static::getTableQuery())
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -85,7 +87,12 @@ class SubscriptionResource extends Resource
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Cliente')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(query: function (Builder $query, string $search) {
+                        $query->whereHas('user', function (Builder $query) use ($search) {
+                            $query->where('first_name', 'like', "{$search}%")
+                                ->orWhere('last_name', 'like', "{$search}%");
+                        });
+                    }),
 
                 Tables\Columns\TextColumn::make('service.name')
                     ->label('Plan')
@@ -99,12 +106,12 @@ class SubscriptionResource extends Resource
 
                 Tables\Columns\TextColumn::make('trial_ends_at')
                     ->label('Fin del Período de Prueba')
-                    ->dateTime()
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('expires_at')
                     ->label('Fecha de Expiración')
-                    ->dateTime()
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable(),
             ])
             ->actions([

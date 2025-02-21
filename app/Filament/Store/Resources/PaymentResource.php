@@ -20,7 +20,7 @@ class PaymentResource extends Resource
 {
     protected static ?string $model = Payment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
     protected static ?string $navigationGroup = 'Gestión de Pagos';
 
@@ -80,7 +80,7 @@ class PaymentResource extends Resource
 
                 Tables\Columns\TextColumn::make('paid_date')
                     ->label('Fecha de Pago')
-                    ->dateTime('d/m/Y')
+                    ->dateTime('d/m/Y', 'America/Caracas')
                     ->sortable()
                     ->placeholder('No disponible'),
             ])
