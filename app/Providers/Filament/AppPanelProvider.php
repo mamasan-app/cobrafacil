@@ -57,17 +57,17 @@ class AppPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->plugins([
-                // FilamentFullCalendarPlugin::make() // Registra el plugin del calendario
-                //     ->timezone('UTC') // Establecer la zona horaria
-                //     ->locale('es') // Establecer el idioma del calendario
-                //     ->config([
-                //         'headerToolbar' => [
-                //             'left' => 'prev,next today',
-                //             'center' => 'title',
-                //             'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
-                //         ],
-                //         'firstDay' => 1, // Comenzar la semana en lunes
-                //     ]),
+                FilamentFullCalendarPlugin::make() // Registra el plugin del calendario
+                    ->timezone('UTC') // Establecer la zona horaria
+                    ->locale('es') // Establecer el idioma del calendario
+                    ->config([
+                        'headerToolbar' => [
+                            'left' => 'prev,next today',
+                            'center' => 'title',
+                            'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
+                        ],
+                        'firstDay' => 1, // Comenzar la semana en lunes
+                    ]),
             ]);
     }
 }
