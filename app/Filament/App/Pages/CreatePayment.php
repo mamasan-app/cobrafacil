@@ -205,7 +205,7 @@ class CreatePayment extends Page
                                     auth()->user()->bankAccounts()
                                         ->get()
                                         ->mapWithKeys(fn ($account) => [
-                                            $account->id => "{$account->bank_code->value} - {$account->phone_number} - {$account->identity_number}".
+                                            $account->id => "{$account->bank_code->getLabel()} | {$account->phone_number} | {$account->identity_document}".
                                                 ($account->default_account ? ' (Predeterminada)' : ''),
                                         ])
                                         ->toArray()
