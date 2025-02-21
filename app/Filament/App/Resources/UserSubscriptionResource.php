@@ -23,7 +23,7 @@ class UserSubscriptionResource extends Resource
 {
     protected static ?string $model = Subscription::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-star';
 
     protected static ?string $modelLabel = 'Suscripciones';
 
