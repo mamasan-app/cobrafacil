@@ -2,6 +2,7 @@
 
 namespace App\Filament\App\Resources\SubscriptionResource\Pages;
 
+use App\Filament\App\Resources\SubscriptionResource;
 use App\Filament\App\Resources\SubscriptionResource\Widgets\PaymentSubscriptionsWidget;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
