@@ -59,13 +59,43 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
         ],
-        'stores' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/stores'), // Aquí defines la ruta base 'stores'
-            'url' => env('APP_URL').'/storage/stores',
-            'visibility' => 'public',
+
+        'do' => [
+            'driver' => 's3',
+            'key' => env('DO_ACCESS_KEY_ID'),
+            'secret' => env('DO_SECRET_ACCESS_KEY'),
+            'region' => env('DO_DEFAULT_REGION'),
+            'bucket' => env('DO_BUCKET'),
+            'url' => env('DO_URL'),
+            'endpoint' => env('DO_ENDPOINT'),
+            'visibility' => 'private',
         ],
 
+        'users_cloud' => [
+            'driver' => 's3',
+            'root' => 'users',
+            'key' => env('DO_ACCESS_KEY_ID'),
+            'secret' => env('DO_SECRET_ACCESS_KEY'),
+            'region' => env('DO_DEFAULT_REGION'),
+            'bucket' => env('DO_BUCKET'),
+            'url' => env('DO_URL'),
+            'endpoint' => env('DO_ENDPOINT'),
+            'use_path_style_endpoint' => env('DO_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
+        ],
+
+        'stores_cloud' => [
+            'driver' => 's3',
+            'root' => 'stores',
+            'key' => env('DO_ACCESS_KEY_ID'),
+            'secret' => env('DO_SECRET_ACCESS_KEY'),
+            'region' => env('DO_DEFAULT_REGION'),
+            'bucket' => env('DO_BUCKET'),
+            'url' => env('DO_URL'),
+            'endpoint' => env('DO_ENDPOINT'),
+            'use_path_style_endpoint' => env('DO_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
+        ],
     ],
 
     /*
