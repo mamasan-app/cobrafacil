@@ -25,13 +25,13 @@ class PaymentHistoryWidget extends BaseWidget
             ->query(
                 Payment::query()
                     ->whereHas('subscription', function ($query) {
-                        $query->where('user_id', auth()->id()); // Filtrar por usuario autenticado
+                        $query->where('user_id', auth()->id());
                     })
             )
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha')
-                    ->dateTime('d M Y, h:i A')
+                    ->dateTime('d M Y, h:i A', 'America/Caracas')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')

@@ -144,7 +144,7 @@ class EmployeeResource extends Resource
 
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->label('Email verificado')
-                    ->dateTime()
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable()
                     ->formatStateUsing(fn ($state) => $state ? $state->format('d-m-Y H:i') : 'No verificado'),
 

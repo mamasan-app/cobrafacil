@@ -85,12 +85,12 @@ class SubscriptionResource extends Resource
 
                 Tables\Columns\TextColumn::make('trial_ends_at')
                     ->label('Fin del Período de Prueba')
-                    ->date('d/m/Y')
+                    ->date('d/m/Y', 'America/Caracas')
                     ->placeholder('No disponible'),
 
                 Tables\Columns\TextColumn::make('expires_at')
                     ->label('Fecha de Expiración')
-                    ->date('d/m/Y')
+                    ->date('d/m/Y', 'America/Caracas')
                     ->placeholder('No disponible'),
             ])
             ->actions([
@@ -121,27 +121,27 @@ class SubscriptionResource extends Resource
 
                                 TextEntry::make('trial_ends_at')
                                     ->label('Fin del Periodo de Prueba')
-                                    ->date('d/m/Y')
+                                    ->date('d/m/Y', 'America/Caracas')
                                     ->placeholder('No disponible'),
 
                                 TextEntry::make('renews_at')
                                     ->label('Renovación')
-                                    ->date('d/m/Y')
+                                    ->date('d/m/Y', 'America/Caracas')
                                     ->placeholder('No disponible'),
 
                                 TextEntry::make('ends_at')
                                     ->label('Fecha de Finalización')
-                                    ->date('d/m/Y')
+                                    ->date('d/m/Y', 'America/Caracas')
                                     ->placeholder('No disponible'),
 
                                 TextEntry::make('last_notification_at')
                                     ->label('Última Notificación')
-                                    ->date('d/m/Y')
+                                    ->date('d/m/Y', 'America/Caracas')
                                     ->placeholder('No disponible'),
 
                                 TextEntry::make('expires_at')
                                     ->label('Fecha de Expiración')
-                                    ->date('d/m/Y')
+                                    ->date('d/m/Y', 'America/Caracas')
                                     ->placeholder('No disponible'),
 
                                 TextEntry::make('frequency_days')

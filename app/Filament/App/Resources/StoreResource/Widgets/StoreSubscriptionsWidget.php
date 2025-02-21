@@ -43,12 +43,12 @@ class StoreSubscriptionsWidget extends BaseWidget
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha de Creación')
-                    ->dateTime()
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('updated_at')
                     ->label('Última Actualización')
-                    ->dateTime()
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable(),
             ])
             ->filters([
