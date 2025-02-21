@@ -8,7 +8,7 @@ use Filament\Resources\Pages\ViewRecord;
 
 class ViewSubscription extends ViewRecord
 {
-    protected static string $resource = UserSubscriptionResource::class;
+    protected static string $resource = SubscriptionResource::class;
 
     /**
      * Muestra el widget de pagos en el pie de la página.

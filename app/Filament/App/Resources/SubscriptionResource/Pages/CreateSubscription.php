@@ -3,7 +3,7 @@
 namespace App\Filament\App\Resources\SubscriptionResource\Pages;
 
 use App\Enums\SubscriptionStatusEnum;
-use App\Filament\App\Resources\UserSubscriptionResource;
+use App\Filament\App\Resources\SubscriptionResource;
 use App\Models\Plan;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CreateSubscription extends CreateRecord
 {
-    protected static string $resource = UserSubscriptionResource::class;
+    protected static string $resource = SubscriptionResource::class;
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {

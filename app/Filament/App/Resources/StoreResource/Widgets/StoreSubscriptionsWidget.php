@@ -2,6 +2,7 @@
 
 namespace App\Filament\App\Resources\StoreResource\Widgets;
 
+use App\Filament\App\Resources\SubscriptionResource\Pages\SubscriptionPayment;
 use App\Models\Subscription;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -55,7 +56,7 @@ class StoreSubscriptionsWidget extends BaseWidget
             ])
             ->actions([
                 Action::make('Pagar')
-                    ->url(fn (Subscription $record): string => \App\Filament\App\Resources\UserSubscriptionResource\Pages\UserSubscriptionPayment::getUrl(['record' => $record]))
+                    ->url(fn (Subscription $record): string => SubscriptionPayment::getUrl(['record' => $record]))
                     ->color('success')
                     ->icon('heroicon-o-currency-dollar')
                     ->label('Pagar')
