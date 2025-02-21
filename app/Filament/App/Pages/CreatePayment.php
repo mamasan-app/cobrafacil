@@ -7,6 +7,7 @@ use App\Enums\PaymentStatusEnum;
 use App\Enums\SubscriptionStatusEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
+use App\Filament\App\Resources\SubscriptionResource\Pages\SubscriptionPayment;
 use App\Filament\Inputs;
 use App\Jobs\MonitorTransactionStatus;
 use App\Models\Payment;
@@ -124,6 +125,8 @@ class CreatePayment extends Page
             ->first();
 
         if (! $this->payment) {
+            redirect(SubscriptionPayment::getUrl(['record' => $this->subscription]));
+
             Notification::make()
                 ->title('Error')
                 ->body('No se encontró un pago pendiente en Bs para esta suscripción.')
@@ -147,7 +150,6 @@ class CreatePayment extends Page
                 ->modalWidth('lg')
                 ->modalActions([
 
-                    // Botón para registrar una nueva cuenta
                     Action::make('registerAccount')
                         ->label('Registrar cuenta y enviar')
                         ->color('gray')
