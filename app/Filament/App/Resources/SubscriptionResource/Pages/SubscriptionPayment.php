@@ -425,7 +425,7 @@ class SubscriptionPayment extends Page
                                     auth()->user()->bankAccounts()
                                         ->get()
                                         ->mapWithKeys(fn ($account) => [
-                                            $account->id => "{$account->bank_code} - {$account->phone_number} - {$account->identity_number}".
+                                            $account->id => "{$account->bank_code->value} - {$account->phone_number} - {$account->identity_number}".
                                                 ($account->default_account ? ' (Predeterminada)' : ''),
                                         ])
                                         ->toArray()
