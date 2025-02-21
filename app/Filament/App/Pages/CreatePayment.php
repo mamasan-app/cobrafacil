@@ -150,7 +150,7 @@ class CreatePayment extends Page
                     // Botón para registrar una nueva cuenta
                     Action::make('registerAccount')
                         ->label('Registrar cuenta y enviar')
-                        ->color('secondary')
+                        ->color('gray')
                         ->form([
                             Forms\Components\Select::make('bank_code')
                                 ->label('Banco')
@@ -296,7 +296,7 @@ class CreatePayment extends Page
     protected function generateOtp()
     {
         // Transformar todos los valores a string
-        $bank = (string) $this->bank;
+        $bank = $this->bank->value;
         $amount = (string) number_format((float) $this->amountInBs, 2, '.', ''); // Convertir a string con dos decimales
         $phone = (string) $this->phone;
         $identity = (string) $this->identity;
@@ -381,7 +381,7 @@ class CreatePayment extends Page
         }
 
         $nombre = $user->name ?? "{$user->first_name} {$user->last_name}"; // Obtener el nombre completo
-        $bank = (string) $this->bank;
+        $bank = $this->bank->value;
         $amount = (string) number_format((float) $this->amountInBs, 2, '.', ''); // Convertir a string con dos decimales
         $phone = (string) $this->phone;
         $identity = (string) $this->identity;
