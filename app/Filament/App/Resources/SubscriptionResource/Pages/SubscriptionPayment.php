@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Filament\App\Resources\UserSubscriptionResource\Pages;
+namespace App\Filament\App\Resources\SubscriptionResource\Pages;
 
 use App\Enums\BankEnum;
-use App\Enums\PhonePrefixEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
-use App\Filament\App\Resources\UserSubscriptionResource;
+use App\Filament\App\Resources\SubscriptionResource;
+use App\Filament\Inputs;
 use App\Jobs\MonitorTransactionStatus;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Services\StripeService;
 use Exception;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -21,9 +20,9 @@ use Filament\Pages\Actions\Action;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Http;
 
-class UserSubscriptionPayment extends Page
+class SubscriptionPayment extends Page
 {
-    protected static string $resource = UserSubscriptionResource::class;
+    protected static string $resource = SubscriptionResource::class;
 
     protected static string $view = 'filament.pages.user-subscription-payment';
 
@@ -44,13 +43,14 @@ class UserSubscriptionPayment extends Page
 
     public $otp = null;
 
-    public $amountInBs; // Monto en bolívares
+    public $amountInBs;
 
     public function mount($record): void
     {
+        /** @var Subscription */
         $this->subscription = Subscription::findOrFail($record);
-        $this->amount = $this->subscription->service_price_cents / 100; // Convertir a dólares
-        $this->amountInBs = $this->convertToBs($this->amount); // Convertir a bolívares
+        $this->amount = $this->subscription->service_price_cents / 100;
+        $this->amountInBs = $this->convertToBs($this->amount);
         $this->otp = null;
 
         if ($filter = request()->query('success') === '1') {
@@ -59,7 +59,7 @@ class UserSubscriptionPayment extends Page
                 ->body('Tu suscripción se activó correctamente.')
                 ->success()
                 ->send();
-            redirect(UserSubscriptionResource::getUrl('index'));
+            redirect(SubscriptionResource::getUrl('index'));
         } elseif ($filter = request()->query('success') === '0') {
             Notification::make()
                 ->title('Pago cancelado')
@@ -371,36 +371,24 @@ class UserSubscriptionPayment extends Page
                 ->modalHeading('Seleccionar una opción')
                 ->modalWidth('lg')
                 ->modalActions([
-                    // Botón para registrar una nueva cuenta
                     Action::make('registerAccount')
                         ->label('Registrar cuenta y enviar')
                         ->color('gray')
                         ->form([
                             Select::make('bank')
                                 ->label('Banco')
-                                ->options(
-                                    collect(BankEnum::cases())
-                                        ->mapWithKeys(fn ($bank) => [$bank->code() => $bank->getLabel()])
-                                        ->toArray()
-                                )
+                                ->options(BankEnum::class)
                                 ->required(),
-                            Grid::make(2)
-                                ->schema([
-                                    Select::make('phone_prefix')
-                                        ->label('Prefijo Telefónico')
-                                        ->options(
-                                            collect(PhonePrefixEnum::cases())
-                                                ->mapWithKeys(fn ($prefix) => [$prefix->value => $prefix->getLabel()])
-                                                ->toArray()
-                                        )
-                                        ->required(),
-                                    TextInput::make('phone_number')
-                                        ->label('Número Telefónico')
-                                        ->numeric()
-                                        ->minLength(7)
-                                        ->maxLength(7)
-                                        ->required(),
-                                ]),
+
+                            Inputs\PhoneNumberInput::make()
+                                ->label('Número de teléfono')
+                                ->required(),
+
+                            Inputs\IdentityPrefixSelect::make()
+                                ->required(),
+
+                            Inputs\IdentityNumberInput::make()
+                                ->required(),
                         ])
                         ->action(function (array $data) {
                             $user = auth()->user();
@@ -411,9 +399,10 @@ class UserSubscriptionPayment extends Page
                             // Registrar la nueva cuenta
                             $newAccount = $user->bankAccounts()->create([
                                 'bank_code' => $data['bank'],
-                                'phone_number' => $data['phone_prefix'].$data['phone_number'],
-                                'identity_number' => str_replace('-', '', $user->identity_document),
-                                'default_account' => ! $hasAccounts, // Si no tiene cuentas, esta es la predeterminada
+                                'phone_number' => $data['phone_number'],
+                                'identity_prefix' => $data['identity_prefix'],
+                                'identity_number' => $data['identity_number'],
+                                'default_account' => ! $hasAccounts,
                             ]);
 
                             // Generar OTP para la nueva cuenta

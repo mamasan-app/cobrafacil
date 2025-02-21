@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Filament\App\Resources\UserSubscriptionResource\Pages;
+namespace App\Filament\App\Resources\SubscriptionResource\Pages;
 
-use App\Filament\App\Resources\UserSubscriptionResource;
-use App\Filament\App\Resources\UserSubscriptionResource\Widgets\PaymentSubscriptionsWidget;
+use App\Filament\App\Resources\SubscriptionResource\Widgets\PaymentSubscriptionsWidget;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 
-class ViewUserSubscription extends ViewRecord
+class ViewSubscription extends ViewRecord
 {
     protected static string $resource = UserSubscriptionResource::class;
 
@@ -35,7 +34,7 @@ class ViewUserSubscription extends ViewRecord
             Actions\Action::make('Pagar')
                 ->url(
                     fn ($record): string => $record->payments->flatMap->transactions->isEmpty()
-                    ? \App\Filament\App\Resources\UserSubscriptionResource\Pages\UserSubscriptionPayment::getUrl(['record' => $record])
+                    ? SubscriptionPayment::getUrl(['record' => $record])
                     : '/'
                 )
                 ->color('success')

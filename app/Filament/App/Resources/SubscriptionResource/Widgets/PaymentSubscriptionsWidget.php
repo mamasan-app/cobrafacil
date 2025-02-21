@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Resources\UserSubscriptionResource\Widgets;
+namespace App\Filament\App\Resources\SubscriptionResource\Widgets;
 
 use App\Models\Payment;
 use Filament\Tables;

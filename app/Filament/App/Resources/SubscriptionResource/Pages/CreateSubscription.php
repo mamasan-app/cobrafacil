@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Resources\UserSubscriptionResource\Pages;
+namespace App\Filament\App\Resources\SubscriptionResource\Pages;
 
 use App\Enums\SubscriptionStatusEnum;
 use App\Filament\App\Resources\UserSubscriptionResource;
@@ -10,7 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 
-class CreateUserSubscription extends CreateRecord
+class CreateSubscription extends CreateRecord
 {
     protected static string $resource = UserSubscriptionResource::class;
 
