@@ -88,9 +88,10 @@ class StorePlansWidget extends BaseWidget
         $freeDays = $plan->free_days;
         $gracePeriod = $plan->grace_period;
         $frequencyDays = $plan->getFrequencyDays();
+        $store = $plan->store;
         $now = Carbon::now();
 
-        $subscription = Subscription::create([
+        Subscription::create([
             'user_id' => $user->id,
             'service_id' => $plan->id,
             'service_name' => $plan->name,
@@ -99,6 +100,7 @@ class StorePlansWidget extends BaseWidget
             'service_free_days' => $freeDays,
             'service_grace_period' => $gracePeriod,
             'frequency_days' => $frequencyDays,
+            'store_id' => $store->id,
             'status' => \App\Enums\SubscriptionStatusEnum::OnTrial->value,
             'trial_ends_at' => $now->clone()->addDays($freeDays),
             'renews_at' => $now->clone()->addDays($freeDays + $frequencyDays),
