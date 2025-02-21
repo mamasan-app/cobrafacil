@@ -267,7 +267,6 @@ class CreatePayment extends Page
 
         try {
             $otpResponse = $this->generateOtp();
-            dd($otpResponse);
 
             if (! isset($otpResponse['success']) || ! $otpResponse['success']) {
                 Notification::make()
