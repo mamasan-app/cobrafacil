@@ -19,6 +19,7 @@
         "laravel/framework": "^11.9",
         "laravel/horizon": "^5.30",
         "laravel/tinker": "^2.9",
+        "league/flysystem-aws-s3-v3": "^3.29",
         "livewire/livewire": "*",
         "moneyphp/money": "^4.5",
         "norbybaru/passwordless-auth": "^1.2",
