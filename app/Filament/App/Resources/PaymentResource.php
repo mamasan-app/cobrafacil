@@ -49,7 +49,7 @@ class PaymentResource extends Resource
 
                 Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')
-                    ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
+                    ->money('USD', 100)
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('status')
@@ -103,7 +103,7 @@ class PaymentResource extends Resource
                                     ->placeholder('No disponible'),
                                 TextEntry::make('amount_cents')
                                     ->label('Monto')
-                                    ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
+                                    ->money('USD', 100)
                                     ->placeholder('No disponible'),
                                 TextEntry::make('status')
                                     ->label('Estado')
@@ -157,14 +157,12 @@ class PaymentResource extends Resource
                                 TextEntry::make('subscription.service_description')
                                     ->label('Descripción del Servicio')
                                     ->placeholder('No disponible'),
-                                TextEntry::make('subscription.formattedServicePrice')
+                                TextEntry::make('subscription.service_price_cents')
                                     ->label('Precio del Servicio')
+                                    ->money('USD', 100)
                                     ->placeholder('No disponible'),
                                 TextEntry::make('subscription.service_free_days')
                                     ->label('Días Gratis')
-                                    ->placeholder('No disponible'),
-                                TextEntry::make('subscription.service_grace_period')
-                                    ->label('Período de Gracia')
                                     ->placeholder('No disponible'),
                             ])->columns(2),
                     ])->columnSpanFull(),

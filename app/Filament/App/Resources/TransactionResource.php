@@ -53,9 +53,9 @@ class TransactionResource extends Resource
                     ->color(fn ($record) => $record->status->getColor())
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('amount')
+                Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')
-                    ->formatStateUsing(fn ($state) => number_format($state, 2).' USD')
+                    ->money('USD', 100)
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('date')
@@ -92,9 +92,9 @@ class TransactionResource extends Resource
                                     ->label('Fecha de Transacción')
                                     ->dateTime('d/m/Y', 'America/Caracas'),
 
-                                TextEntry::make('amount')
+                                TextEntry::make('amount_cents')
                                     ->label('Monto (USD)')
-                                    ->getStateUsing(fn ($record) => number_format($record->amount, 2).' USD'),
+                                    ->money('USD', 100),
 
                                 TextEntry::make('from_user_name')
                                     ->label('Usuario (From)')
@@ -155,15 +155,18 @@ class TransactionResource extends Resource
                                 TextEntry::make('stripe_invoice_id')
                                     ->label('ID de Factura (Stripe)')
                                     ->placeholder('No disponible'),
+
                                 TextEntry::make('amount_cents')
                                     ->label('Monto')
-                                    ->getStateUsing(fn ($record) => number_format($record->amount_cents / 100, 2).' USD')
+                                    ->money('USD', 100)
                                     ->placeholder('No disponible'),
+
                                 TextEntry::make('status')
                                     ->label('Estado')
                                     ->badge()
                                     ->color(fn ($record) => $record->status->getColor())
                                     ->placeholder('No disponible'),
+
                                 TextEntry::make('paid_date')
                                     ->label('Fecha de Pago')
                                     ->dateTime('d/m/Y', 'America/Caracas')

@@ -42,10 +42,12 @@ class StorePlansWidget extends BaseWidget
                     ->placeholder('No disponible')
                     ->wrap(),
 
-                Tables\Columns\TextColumn::make('formattedPrice')
+                Tables\Columns\TextColumn::make('price_cents')
                     ->label('Precio')
                     ->placeholder('No disponible')
+                    ->money('USD', 100)
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('duration_text')
                     ->label('Duración')
                     ->placeholder('No disponible')

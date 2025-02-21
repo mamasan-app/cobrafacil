@@ -41,9 +41,9 @@ class TransactionsWidget extends BaseWidget
                     ->color(fn ($record) => $record->status->getColor())
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('amount')
+                Tables\Columns\TextColumn::make('amount_cents')
                     ->label('Monto (USD)')
-                    ->formatStateUsing(fn ($state) => number_format($state, 2).'USD')
+                    ->money('USD', 100)
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('date')
