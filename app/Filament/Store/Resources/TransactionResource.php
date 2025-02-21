@@ -19,7 +19,7 @@ class TransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
 
     protected static ?string $navigationGroup = 'Gestión de Pagos';
 
@@ -64,7 +64,7 @@ class TransactionResource extends Resource
 
                 Tables\Columns\TextColumn::make('date')
                     ->label('Fecha')
-                    ->dateTime()
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable(),
             ])
             ->filters([

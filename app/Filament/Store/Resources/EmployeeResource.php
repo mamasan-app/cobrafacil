@@ -149,17 +149,20 @@ class EmployeeResource extends Resource
                     ->formatStateUsing(fn ($state) => $state ? $state->format('d-m-Y H:i') : 'No verificado'),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Fecha de Creación')
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Fecha de Edición')
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
+                    ->label('Fecha de Eliminación')
+                    ->dateTime(null, 'America/Caracas')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
