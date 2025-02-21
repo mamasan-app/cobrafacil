@@ -267,7 +267,7 @@ class CreatePayment extends Page
 
         try {
             $otpResponse = $this->generateOtp();
-            // dd($otpResponse);
+            dd($otpResponse);
 
             if (! isset($otpResponse['success']) || ! $otpResponse['success']) {
                 Notification::make()
@@ -300,7 +300,7 @@ class CreatePayment extends Page
         // Transformar todos los valores a string
         $bank = $this->bank->value;
         $amount = (string) number_format((float) $this->amountInBs, 2, '.', ''); // Convertir a string con dos decimales
-        $phone = (string) $this->phone;
+        $phone = (string) str_replace('+58', '0', $this->phone);
         $identity = (string) $this->identity;
 
         // Concatenar los datos para el HMAC-SHA256

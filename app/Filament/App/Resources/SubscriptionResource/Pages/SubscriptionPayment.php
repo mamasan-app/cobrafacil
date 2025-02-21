@@ -183,12 +183,11 @@ class SubscriptionPayment extends Page
     public function submitBolivaresPayment(array $data)
     {
         $this->bank = $data['bank'];
-        $this->phone = $data['phone'];
+        $this->phone = str_replace('+58', '0', $data['phone']);
         $this->identity = $data['identity'];
 
         try {
             $otpResponse = $this->generateOtp();
-            // dd($otpResponse);
 
             if (! isset($otpResponse['success']) || ! $otpResponse['success']) {
                 Notification::make()
