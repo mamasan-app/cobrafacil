@@ -166,10 +166,6 @@ class SubscriptionResource extends Resource
                                 TextEntry::make('service_free_days')
                                     ->label('Días Gratis')
                                     ->placeholder('No disponible'),
-
-                                TextEntry::make('service_grace_period')
-                                    ->label('Período de Gracia')
-                                    ->placeholder('No disponible'),
                             ])->columns(2),
 
                         Tab::make('Tienda')
@@ -191,18 +187,6 @@ class SubscriptionResource extends Resource
                                             ->getStateUsing(fn ($record) => $record->store?->verified ? 'Sí' : 'No')
                                             ->badge()
                                             ->color(fn ($state) => $state === 'Sí' ? 'success' : 'danger'),
-
-                                        TextEntry::make('store.owner.name')
-                                            ->label('Nombre del Propietario')
-                                            ->placeholder('No disponible'),
-
-                                        TextEntry::make('store.owner.email')
-                                            ->label('Correo Electrónico')
-                                            ->placeholder('No disponible'),
-
-                                        TextEntry::make('store.owner.phone')
-                                            ->label('Teléfono')
-                                            ->placeholder('No disponible'),
                                     ])
                                     ->columns(2),
                             ]),
