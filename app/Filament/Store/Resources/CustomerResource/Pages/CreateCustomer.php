@@ -29,21 +29,6 @@ class CreateCustomer extends CreateRecord
         $this->email = $data['email'];
 
         if ($user) {
-            $isTheUserACustomer = $user->stores()
-                ->wherePivot('store_id', $store->id)
-                ->wherePivot('role', 'customer')
-                ->exists();
-
-            if ($isTheUserACustomer) {
-                Notification::make()
-                    ->title('Cliente existente')
-                    ->body('El usuario ya está asociado como cliente en esta tienda.')
-                    ->warning()
-                    ->send();
-
-                return;
-            }
-
             $user->assignRole('customer');
             $user->stores()->attach($store->id, ['role' => 'customer']);
             $this->sendMagicLink($user);
@@ -75,6 +60,7 @@ class CreateCustomer extends CreateRecord
 
         if ($user) {
             $store = Filament::getTenant();
+            $user->assignRole('customer');
             $user->stores()->attach($store->id, ['role' => 'customer']);
 
             $user->email_verified_at = now();
