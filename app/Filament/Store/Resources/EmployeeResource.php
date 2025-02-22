@@ -28,79 +28,78 @@ class EmployeeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('first_name')
-                    ->label('Nombre')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('first_name')
+                            ->label('Nombre')
+                            ->required()
+                            ->maxLength(255),
 
-                Forms\Components\TextInput::make('last_name')
-                    ->label('Apellido')
-                    ->required()
-                    ->maxLength(255),
+                        Forms\Components\TextInput::make('last_name')
+                            ->label('Apellido')
+                            ->required()
+                            ->maxLength(255),
 
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->unique('users', 'email', fn (User $record) => $record)
+                            ->required()
+                            ->maxLength(255),
 
-                Inputs\PhoneNumberInput::make()
-                    ->required(),
+                        Inputs\PhoneNumberInput::make()
+                            ->required(),
 
-                Inputs\IdentityPrefixSelect::make()
-                    ->required(),
+                        Inputs\IdentityPrefixSelect::make()
+                            ->required(),
 
-                Inputs\IdentityNumberInput::make()
-                    ->required()
-                    ->rules(function (Forms\Get $get) {
-                        return [
-                            Rule::unique('users', 'identity_number')->where(function ($query) use ($get) {
-                                return $query->where('identity_prefix', $get('identity_prefix'));
+                        Inputs\IdentityNumberInput::make()
+                            ->required()
+                            ->rules(function (Forms\Get $get, User $record) {
+                                return [
+                                    Rule::unique('users', 'identity_number')
+                                        ->ignore($record->id)
+                                        ->where(function ($query) use ($get) {
+                                            return $query->where('identity_prefix', $get('identity_prefix'));
+                                        }),
+                                ];
                             }),
-                        ];
-                    }),
 
-                Forms\Components\Select::make('stores')
-                    ->label('Tiendas')
-                    ->multiple()
-                    ->options(function () {
-                        return auth()->user()->stores()->pluck('stores.name', 'stores.id');
-                    })
-                    ->required()
-                    ->preload(),
+                        Forms\Components\TextInput::make('password')
+                            ->label('Contraseña')
+                            ->password()
+                            ->revealable()
+                            ->required()
+                            ->hiddenOn('edit')
+                            ->confirmed()
+                            ->maxLength(255),
 
-                Forms\Components\TextInput::make('password')
-                    ->label('Contraseña')
-                    ->password()
-                    ->revealable()
-                    ->required()
-                    ->hiddenOn('edit')
-                    ->confirmed()
-                    ->maxLength(255),
+                        Forms\Components\TextInput::make('password_confirmation')
+                            ->label('Confirmar contraseña')
+                            ->password()
+                            ->revealable()
+                            ->hiddenOn('edit')
+                            ->autocomplete(false)
+                            ->maxLength(255)
+                            ->required(),
 
-                Forms\Components\TextInput::make('password_confirmation')
-                    ->label('Confirmar contraseña')
-                    ->password()
-                    ->revealable()
-                    ->hiddenOn('edit')
-                    ->autocomplete(false)
-                    ->maxLength(255)
-                    ->required(),
+                        Forms\Components\TextInput::make('new_password')
+                            ->label('Nueva contraseña')
+                            ->nullable()
+                            ->password()
+                            ->hidden(fn () => ! auth()->user()->hasRole('owner_store'))
+                            ->revealable()
+                            ->visibleOn('edit')
+                            ->maxLength(255),
 
-                Forms\Components\TextInput::make('new_password')
-                    ->label('Nueva contraseña')
-                    ->nullable()
-                    ->password()
-                    ->revealable()
-                    ->visibleOn('edit')
-                    ->maxLength(255),
-
-                Forms\Components\TextInput::make('new_password_confirmation')
-                    ->label('Confirmar contraseña')
-                    ->password()
-                    ->revealable()
-                    ->visibleOn('edit')
-                    ->same('new_password')
-                    ->requiredWith('new_password'),
+                        Forms\Components\TextInput::make('new_password_confirmation')
+                            ->label('Confirmar contraseña')
+                            ->password()
+                            ->hidden(fn () => ! auth()->user()->hasRole('owner_store'))
+                            ->revealable()
+                            ->visibleOn('edit')
+                            ->same('new_password')
+                            ->requiredWith('new_password'),
+                    ])->columns(2),
             ]);
     }
 
