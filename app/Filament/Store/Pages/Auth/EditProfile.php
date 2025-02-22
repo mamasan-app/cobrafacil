@@ -30,7 +30,7 @@ class EditProfile extends BaseEditProfile
                     ->label('Correo Electrónico')
                     ->email()
                     ->required()
-                    ->unique('users', 'email'),
+                    ->unique('users', 'email', fn () => auth()->user()),
 
                 Inputs\PhoneNumberInput::make('phone_number')
                     ->label('Número de Teléfono')
