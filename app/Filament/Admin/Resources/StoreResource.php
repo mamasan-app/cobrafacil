@@ -26,19 +26,28 @@ class StoreResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
+
                 Forms\Components\TextInput::make('url')
                     ->maxLength(255),
+
                 Forms\Components\TextInput::make('address')
                     ->required()
                     ->maxLength(255),
+
                 Forms\Components\FileUpload::make('certificate_of_incorporation_path')
                     ->label('Certificate of Incorporation')
                     ->maxSize(1024)
+                    ->maxFiles(1)
+                    ->visibility('private')
                     ->acceptedFileTypes(['application/pdf', 'image/*']),
+
                 Forms\Components\FileUpload::make('rif_path')
                     ->label('RIF')
                     ->maxSize(1024)
+                    ->maxFiles(1)
+                    ->visibility('private')
                     ->acceptedFileTypes(['application/pdf', 'image/*']),
+
                 Forms\Components\Select::make('owner_id')
                     ->label('Owner')
                     ->options(function () {

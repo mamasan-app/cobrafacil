@@ -72,8 +72,7 @@ class CustomerResource extends Resource
 
                         Inputs\PhoneNumberInput::make()
                             ->required()
-                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields'))
-                            ->unique('users', 'phone_number'),
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Inputs\IdentityPrefixSelect::make()
                             ->required()

@@ -128,14 +128,16 @@ class UserRegister extends FilamentRegister
                     ->image()
                     ->disk(config('filesystems.users'))
                     ->maxFiles(1)
-                    ->placeholder('selfie.jpg'),
+                    ->placeholder('selfie.jpg')
+                    ->visibility('private'),
 
                 FileUpload::make('ci_picture_path')
                     ->label('Foto de la Cédula')
                     ->image()
                     ->disk(config('filesystems.users'))
                     ->maxFiles(1)
-                    ->placeholder('ci.jpg'),
+                    ->placeholder('ci.jpg')
+                    ->visibility('private'),
 
                 Checkbox::make('terms_and_conditions_accepted')
                     ->columnSpanFull()
@@ -173,13 +175,15 @@ class UserRegister extends FilamentRegister
                     ->label('RIF de la Tienda')
                     ->disk(config('filesystems.stores'))
                     ->maxFiles(1)
-                    ->placeholder('rif.jpg'),
+                    ->placeholder('rif.jpg')
+                    ->visibility('private'),
 
                 FileUpload::make('constitutive_document_path')
                     ->label('Documento Constitutivo')
                     ->disk(config('filesystems.stores'))
                     ->maxFiles(1)
-                    ->placeholder('certificate.jpg'),
+                    ->placeholder('certificate.jpg')
+                    ->visibility('private'),
 
                 Forms\Components\Section::make('Información de la Cuenta Bancaria')
                     ->description('Por favor, proporciona los datos de la cuenta bancaria de la tienda.')
