@@ -76,6 +76,8 @@ class StoreResource extends Resource
                                 ImageEntry::make('logoUrl')
                                     ->label('Logo')
                                     ->circular()
+                                    ->disk(config('filesystems.stores'))
+                                    ->visibility('private')
                                     ->placeholder('No disponible'),
 
                                 Group::make()

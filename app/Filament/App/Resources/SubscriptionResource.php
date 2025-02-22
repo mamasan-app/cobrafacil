@@ -175,6 +175,8 @@ class SubscriptionResource extends Resource
                                         ImageEntry::make('store.logoUrl')
                                             ->label('Logo de la Tienda')
                                             ->circular()
+                                            ->disk(config('filesystems.stores'))
+                                            ->visibility('private')
                                             ->placeholder('No disponible')
                                             ->columnSpan(2),
 
