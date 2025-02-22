@@ -42,8 +42,7 @@ class UserResource extends Resource
                     ->maxLength(255),
 
                 Inputs\PhoneNumberInput::make()
-                    ->required()
-                    ->unique('users', 'phone_number'),
+                    ->required(),
 
                 Inputs\IdentityPrefixSelect::make()
                     ->required(),
