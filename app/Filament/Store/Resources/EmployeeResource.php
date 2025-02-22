@@ -42,7 +42,7 @@ class EmployeeResource extends Resource
 
                         Forms\Components\TextInput::make('email')
                             ->email()
-                            ->unique('users', 'email')
+                            ->unique('users', 'email', fn (User $record) => $record)
                             ->required()
                             ->maxLength(255),
 
@@ -54,11 +54,13 @@ class EmployeeResource extends Resource
 
                         Inputs\IdentityNumberInput::make()
                             ->required()
-                            ->rules(function (Forms\Get $get) {
+                            ->rules(function (Forms\Get $get, User $record) {
                                 return [
-                                    Rule::unique('users', 'identity_number')->where(function ($query) use ($get) {
-                                        return $query->where('identity_prefix', $get('identity_prefix'));
-                                    }),
+                                    Rule::unique('users', 'identity_number')
+                                        ->ignore($record->id)
+                                        ->where(function ($query) use ($get) {
+                                            return $query->where('identity_prefix', $get('identity_prefix'));
+                                        }),
                                 ];
                             }),
 
@@ -84,6 +86,7 @@ class EmployeeResource extends Resource
                             ->label('Nueva contraseña')
                             ->nullable()
                             ->password()
+                            ->hidden(fn () => ! auth()->user()->hasRole('owner_store'))
                             ->revealable()
                             ->visibleOn('edit')
                             ->maxLength(255),
@@ -91,6 +94,7 @@ class EmployeeResource extends Resource
                         Forms\Components\TextInput::make('new_password_confirmation')
                             ->label('Confirmar contraseña')
                             ->password()
+                            ->hidden(fn () => ! auth()->user()->hasRole('owner_store'))
                             ->revealable()
                             ->visibleOn('edit')
                             ->same('new_password')

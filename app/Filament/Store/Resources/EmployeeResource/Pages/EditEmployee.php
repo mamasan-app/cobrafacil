@@ -16,4 +16,15 @@ class EditEmployee extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $password = $data['new_password'] ?? null;
+
+        if ($password) {
+            $data['password'] = bcrypt($password);
+        }
+
+        return $data;
+    }
 }
