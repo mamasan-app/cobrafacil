@@ -42,7 +42,7 @@ class EmployeeResource extends Resource
 
                         Forms\Components\TextInput::make('email')
                             ->email()
-                            ->unique('users', 'email', fn (User $record) => $record)
+                            ->unique('users', 'email', fn (?User $record) => $record ?? null)
                             ->required()
                             ->maxLength(255),
 
@@ -54,10 +54,10 @@ class EmployeeResource extends Resource
 
                         Inputs\IdentityNumberInput::make()
                             ->required()
-                            ->rules(function (Forms\Get $get, User $record) {
+                            ->rules(function (Forms\Get $get, ?User $record) {
                                 return [
                                     Rule::unique('users', 'identity_number')
-                                        ->ignore($record->id)
+                                        ->ignore($record?->id)
                                         ->where(function ($query) use ($get) {
                                             return $query->where('identity_prefix', $get('identity_prefix'));
                                         }),
