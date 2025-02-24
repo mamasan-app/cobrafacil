@@ -30,7 +30,12 @@ class CreateCustomer extends CreateRecord
 
         if ($user) {
             $user->assignRole('customer');
-            $user->stores()->attach($store->id, ['role' => 'customer']);
+            if (! $user->stores()
+                ->where('store_id', $store->id)
+                ->wherePivot('role', 'customer')
+                ->exists()) {
+                $user->stores()->attach($store->id, ['role' => 'customer']);
+            }
             $this->sendMagicLink($user);
 
             Notification::make()
@@ -38,6 +43,8 @@ class CreateCustomer extends CreateRecord
                 ->body('El usuario fue asociado como cliente a la tienda y se le envió un enlace de inicio de sesión.')
                 ->success()
                 ->send();
+
+            redirect()->route('filament.store.resources.customers.edit', [$store, $user]);
 
             return;
         }

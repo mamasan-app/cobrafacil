@@ -29,7 +29,12 @@ class CreateEmployee extends CreateRecord
 
         if ($user) {
             $user->assignRole('employee');
-            $user->stores()->attach($store->id, ['role' => 'employee']);
+            if (! $user->stores()
+                ->where('store_id', $store->id)
+                ->wherePivot('role', 'employee')
+                ->exists()) {
+                $user->stores()->attach($store->id, ['role' => 'employee']);
+            }
             $this->sendMagicLink($user);
 
             Notification::make()
@@ -37,6 +42,8 @@ class CreateEmployee extends CreateRecord
                 ->body('El usuario fue asociado como empleado a la tienda y se le envió un enlace de inicio de sesión.')
                 ->success()
                 ->send();
+
+            redirect()->route('filament.store.resources.employees.edit', [$store, $user]);
 
             return;
         }
@@ -55,7 +62,7 @@ class CreateEmployee extends CreateRecord
 
     protected function sendMagicLink(User $user): void
     {
-        $route = route('filament.store.pages.dashboard');
+        $route = route('filament.store.pages.dashboard', [Filament::getTenant()->slug]);
         $action = new LoginAction($user);
         $action->response(fn () => redirect($route));
         $magicLinkUrl = MagicLink::create($action)->url;

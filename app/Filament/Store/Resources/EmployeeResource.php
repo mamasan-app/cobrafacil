@@ -5,7 +5,6 @@ namespace App\Filament\Store\Resources;
 use App\Filament\Inputs;
 use App\Filament\Store\Resources\EmployeeResource\Pages;
 use App\Models\User;
-use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -31,6 +30,7 @@ class EmployeeResource extends Resource
                 Forms\Components\Section::make()
                     ->schema([
                         Forms\Components\TextInput::make('email')
+                            ->label('Correo Electrónico')
                             ->email()
                             ->required()
                             ->afterStateHydrated(fn (Forms\Set $set) => $set('showAdditionalFields', true))
@@ -59,18 +59,22 @@ class EmployeeResource extends Resource
                         Forms\Components\TextInput::make('first_name')
                             ->label('Nombre')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Forms\Components\TextInput::make('last_name')
                             ->label('Apellido')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Inputs\PhoneNumberInput::make()
-                            ->required(),
+                            ->required()
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Inputs\IdentityPrefixSelect::make()
-                            ->required(),
+                            ->required()
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Inputs\IdentityNumberInput::make()
                             ->required()
@@ -82,16 +86,17 @@ class EmployeeResource extends Resource
                                             return $query->where('identity_prefix', $get('identity_prefix'));
                                         }),
                                 ];
-                            }),
+                            })
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields')),
 
                         Forms\Components\TextInput::make('password')
                             ->label('Contraseña')
                             ->password()
                             ->revealable()
                             ->required()
-                            ->hiddenOn('edit')
                             ->confirmed()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields') || request()->routeIs('*edit*')),
 
                         Forms\Components\TextInput::make('password_confirmation')
                             ->label('Confirmar contraseña')
@@ -100,7 +105,8 @@ class EmployeeResource extends Resource
                             ->hiddenOn('edit')
                             ->autocomplete(false)
                             ->maxLength(255)
-                            ->required(),
+                            ->required()
+                            ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields') || request()->routeIs('*edit*')),
 
                         Forms\Components\TextInput::make('new_password')
                             ->label('Nueva contraseña')
@@ -206,20 +212,9 @@ class EmployeeResource extends Resource
 
     public static function getTableQuery()
     {
-        // Obtener la tienda actual desde la sesión (usando Filament::getTenant())
-        $currentStore = Filament::getTenant();
-
-        if (! $currentStore) {
-            // Si no hay tienda en sesión, devolver una consulta vacía
-            return User::query()->whereRaw('1 = 0');
-        }
-
-        // Filtrar los usuarios con rol 'employee' asociados a la tienda actual
-        return User::query()
-            ->whereHas('stores', function ($query) use ($currentStore) {
-                $query->where('stores.id', $currentStore->id);
-            })
-            ->role('employee');
+        return parent::getEloquentQuery()->whereHas('stores', function ($query): void {
+            $query->where('store_user.role', 'employee');
+        });
     }
 
     public static function getPages(): array
