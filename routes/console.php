@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use Taecontrol\Larvis\Commands\CheckHardwareHealthCommand;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -10,5 +11,6 @@ Artisan::command('inspire', function () {
 
 Schedule::command('transactions:process')->everyFiveSeconds();
 
-// Ejecutar el comando de recordatorio de suscripciones a la medianoche
 Schedule::command('subscriptions:send-reminders')->dailyAt('00:00');
+
+Schedule::command(CheckHardwareHealthCommand::class)->daily();

@@ -28,6 +28,7 @@
         "spatie/laravel-permission": "^6.9",
         "spatie/laravel-webhook-client": "^3.4",
         "stripe/stripe-php": "^16.1",
+        "taecontrol/larvis": "^1.2",
         "tightenco/ziggy": "^2.5"
     },
     "require-dev": {
