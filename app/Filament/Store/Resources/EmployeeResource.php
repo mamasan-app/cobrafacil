@@ -30,6 +30,32 @@ class EmployeeResource extends Resource
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
+                        Forms\Components\TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->afterStateHydrated(fn (Forms\Set $set) => $set('showAdditionalFields', true))
+                            ->live(onBlur: false, debounce: 500)
+                            ->afterStateUpdated(function (?string $state, Pages\CreateEmployee|Pages\EditEmployee $livewire, Forms\Set $set) {
+                                $userExists = User::where('email', $state)->exists();
+
+                                if ($livewire instanceof Pages\CreateEmployee) {
+                                    $createButton = $livewire->getAction('create');
+
+                                    if ($userExists) {
+                                        $createButton->label('Asociar');
+                                        $set('showAdditionalFields', false);
+                                    } else {
+                                        $createButton->label('Crear');
+                                        $set('showAdditionalFields', true);
+                                    }
+                                }
+                            })
+                            ->helperText(function (Forms\Get $get) {
+                                if (! $get('showAdditionalFields')) {
+                                    return 'El usuario ya existe en el sistema. Puedes enviarle un enlace de inicio de sesión en el botón de abajo.';
+                                }
+                            }),
+
                         Forms\Components\TextInput::make('first_name')
                             ->label('Nombre')
                             ->required()
@@ -37,12 +63,6 @@ class EmployeeResource extends Resource
 
                         Forms\Components\TextInput::make('last_name')
                             ->label('Apellido')
-                            ->required()
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('email')
-                            ->email()
-                            ->unique('users', 'email', fn (?User $record) => $record ?? null)
                             ->required()
                             ->maxLength(255),
 
