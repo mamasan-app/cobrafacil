@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d3367ce85de3a5d79ba90d17cb581346",
+    "content-hash": "4fbda001a423e50a05d5d736311c5dff",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -8729,6 +8729,59 @@
                 }
             ],
             "time": "2024-11-08T15:48:14+00:00"
+        },
+        {
+            "name": "taecontrol/larvis",
+            "version": "v1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/taecontrol/larvis.git",
+                "reference": "413a339d0f50bacc4b38a5874495f244b3dd5159"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/taecontrol/larvis/zipball/413a339d0f50bacc4b38a5874495f244b3dd5159",
+                "reference": "413a339d0f50bacc4b38a5874495f244b3dd5159",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.14",
+                "orchestra/testbench": "^7.15",
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Larvis": "Taecontrol\\Larvis\\Facades\\Larvis"
+                    },
+                    "providers": [
+                        "Taecontrol\\Larvis\\Providers\\LarvisServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "Taecontrol\\Larvis\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Moonguard assistant package",
+            "support": {
+                "issues": "https://github.com/taecontrol/larvis/issues",
+                "source": "https://github.com/taecontrol/larvis/tree/v1.2.1"
+            },
+            "time": "2024-10-08T12:09:49+00:00"
         },
         {
             "name": "tightenco/ziggy",
