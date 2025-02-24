@@ -46,7 +46,7 @@ class CustomerResource extends Resource
                                     $createButton = $livewire->getAction('create');
 
                                     if ($userExists) {
-                                        $createButton->label('Enviar Enlace');
+                                        $createButton->label('Asociar');
                                         $set('showAdditionalFields', false);
                                     } else {
                                         $createButton->label('Crear');
@@ -81,11 +81,13 @@ class CustomerResource extends Resource
                         Inputs\IdentityNumberInput::make()
                             ->required()
                             ->hidden(fn (Forms\Get $get) => ! $get('showAdditionalFields'))
-                            ->rules(function (Forms\Get $get) {
+                            ->rules(function (Forms\Get $get, ?User $record) {
                                 return [
-                                    Rule::unique('users', 'identity_number')->where(function ($query) use ($get) {
-                                        return $query->where('identity_prefix', $get('identity_prefix'));
-                                    }),
+                                    Rule::unique('users', 'identity_number')
+                                        ->ignore($record?->id)
+                                        ->where(function ($query) use ($get) {
+                                            return $query->where('identity_prefix', $get('identity_prefix'));
+                                        }),
                                 ];
                             }),
 
