@@ -70,16 +70,14 @@ class CreatePayment extends Page
             Select::make('subscription_id')
                 ->label('Suscripción')
                 ->options(
-                    Subscription::where(function ($query) {
-                        $query->where('status', SubscriptionStatusEnum::OnTrial->value)
-                            ->orWhereHas('payments', function ($query) {
-                                $query->where('is_bs', true)
-                                    ->where('status', PaymentStatusEnum::Pending);
-                            });
+                    Subscription::whereHas('payments', function ($query) {
+                        return $query->where('is_bs', true)
+                            ->where('status', PaymentStatusEnum::Pending);
                     })
+                        ->where('user_id', auth()->id())
                         ->whereNull('stripe_subscription_id')
                         ->get()
-                        ->mapWithKeys(fn ($sub) => [$sub->id => "{$sub->id} - {$sub->service_name}"])
+                        ->mapWithKeys(fn (Subscription $sub) => [$sub->id => "{$sub->store->name} | {$sub->service_name}"])
                         ->toArray()
 
                 )
