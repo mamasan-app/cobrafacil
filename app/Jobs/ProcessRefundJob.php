@@ -18,11 +18,11 @@ class ProcessRefundJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $transaction;
+    protected Transaction $transaction;
 
-    protected $montoVuelto;
+    protected float $montoVuelto;
 
-    protected $store;
+    protected Store $store;
 
     public function __construct(Transaction $transaction, float $montoVuelto, Store $store)
     {
@@ -41,10 +41,10 @@ class ProcessRefundJob implements ShouldQueue
 
         $bankAccount = $this->store->defaultBankAccount();
 
-        $bank = (string) $bankAccount->bank_code;
-        $amount = (string) number_format((float) $this->montoVuelto, 2, '.', ''); // Convertir a string con dos decimales
-        $phone = (string) $bankAccount->phone_number;
-        $identity = (string) $bankAccount->identity_number;
+        $bank = $bankAccount->bank_code->code;
+        $amount = (string) number_format((float) $this->montoVuelto, 2, '.', '');
+        $phone = $bankAccount->phone_number;
+        $identity = str_replace('-', '', $bankAccount->identity_document);
 
         Log::info('Enviando solicitud de vuelto', [
             'TelefonoDestino' => $phone,
