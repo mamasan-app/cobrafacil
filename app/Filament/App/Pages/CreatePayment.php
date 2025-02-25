@@ -233,11 +233,11 @@ class CreatePayment extends Page
 
                     // Botón para confirmar OTP
                     Action::make('confirmOtp')
-                        ->label('Confirmar OTP')
+                        ->label('Confirmar Clave de Seguridad (SMS)')
                         ->color('info')
                         ->form([
                             TextInput::make('otp')
-                                ->label('Código OTP')
+                                ->label('Clave de Seguridad')
                                 ->required(),
                         ])
                         ->action(function (array $data) {
