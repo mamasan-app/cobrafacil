@@ -15,16 +15,17 @@ use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class DevelopmentSeeder extends Seeder
 {
-    protected array $frequencies;
+    protected Collection $frequencies;
 
     protected ?Subscription $subscription;
 
     public function __construct()
     {
-        $this->frequencies = [];
+        $this->frequencies = Frequency::all();
         $this->subscription = null;
     }
 
@@ -94,18 +95,9 @@ class DevelopmentSeeder extends Seeder
         $store->users()->attach($customer->id, ['role' => 'customer']);
         $store->users()->attach($employee->id, ['role' => 'customer']);
 
-        $this->makeFrequencies();
         $this->makeStorePlans($store);
         $this->makeSubscriptions($store);
         $this->makeTransactions($store);
-    }
-
-    public function makeFrequencies(): void
-    {
-        $this->frequencies[] = Frequency::create(['name' => 'Diaria', 'days_count' => 1]);
-        $this->frequencies[] = Frequency::create(['name' => 'Semanal', 'days_count' => 7]);
-        $this->frequencies[] = Frequency::create(['name' => 'Mensual', 'days_count' => 30]);
-        $this->frequencies[] = Frequency::create(['name' => 'Anual', 'days_count' => 365]);
     }
 
     public function makeSubscriptions(Store $store): void

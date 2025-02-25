@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $seeders = [
             RoleSeeder::class,
             RolePermissionSeeder::class,
+            FrequencySeeder::class,
         ];
 
         if (config('app.env' === 'local')) {
