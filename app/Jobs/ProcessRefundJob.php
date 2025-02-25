@@ -41,7 +41,7 @@ class ProcessRefundJob implements ShouldQueue
 
         $bankAccount = $this->store->defaultBankAccount();
 
-        $bank = $bankAccount->bank_code->code;
+        $bank = $bankAccount->bank_code->value;
         $amount = (string) number_format((float) $this->montoVuelto, 2, '.', '');
         $phone = $bankAccount->phone_number;
         $identity = str_replace('-', '', $bankAccount->identity_document);
