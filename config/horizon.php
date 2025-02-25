@@ -211,4 +211,6 @@ return [
             ],
         ],
     ],
+
+    'users' => env('HORIZON_USERS'),
 ];
