@@ -43,7 +43,7 @@ class ProcessRefundJob implements ShouldQueue
 
         $bank = $bankAccount->bank_code->value;
         $amount = (string) number_format((float) $this->montoVuelto, 2, '.', '');
-        $phone = $bankAccount->phone_number;
+        $phone = str_replace('+58', '0', $bankAccount->phone_number);
         $identity = str_replace('-', '', $bankAccount->identity_document);
 
         Log::info('Enviando solicitud de vuelto', [
