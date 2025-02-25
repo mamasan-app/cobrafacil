@@ -13,22 +13,17 @@ class CreateBankAccount extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $currentStore = Filament::getTenant();
-
-        if ($currentStore) {
-            $data['store_id'] = $currentStore->id;
-            $data['user_id'] = $currentStore->owner_id;
-
-            // Combinar el prefijo y el número de identidad
-            $data['identity_number'] = $data['identity_prefix'].'-'.$data['identity_number'];
-            $data['phone_number'] = $data['phone_prefix'].$data['phone_number'];
-
-            if (! empty($data['default_account']) && $data['default_account'] == true) {
-                BankAccount::where('store_id', $currentStore->id)
-                    ->update(['default_account' => false]);
-            }
-        }
-
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        $store = Filament::getTenant();
+
+        if ($this->record->default_account) {
+            BankAccount::where('store_id', $store->id)
+                ->where('id', '!=', $this->record->id)
+                ->update(['default_account' => false]);
+        }
     }
 }
