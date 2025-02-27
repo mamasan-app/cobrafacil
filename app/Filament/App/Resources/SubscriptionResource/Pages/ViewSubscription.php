@@ -11,9 +11,6 @@ class ViewSubscription extends ViewRecord
 {
     protected static string $resource = SubscriptionResource::class;
 
-    /**
-     * Muestra el widget de pagos en el pie de la página.
-     */
     protected function getFooterWidgets(): array
     {
         return [
@@ -26,18 +23,11 @@ class ViewSubscription extends ViewRecord
         return 'Ver Suscripcion';
     }
 
-    /**
-     * Define las acciones adicionales para la página.
-     */
     protected function getActions(): array
     {
         return [
             Actions\Action::make('Pagar')
-                ->url(
-                    fn ($record): string => $record->payments->flatMap->transactions->isEmpty()
-                    ? SubscriptionPayment::getUrl(['record' => $record])
-                    : '/'
-                )
+                ->url(SubscriptionPayment::getUrl(['record' => $this->record]))
                 ->color('success')
                 ->icon('heroicon-o-currency-dollar')
                 ->label('Pagar')

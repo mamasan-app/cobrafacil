@@ -2,21 +2,17 @@
 
 namespace App\Filament\App\Resources\SubscriptionResource\Pages;
 
-use App\Enums\BankEnum;
 use App\Enums\TransactionStatusEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Filament\App\Resources\SubscriptionResource;
-use App\Filament\Inputs;
 use App\Jobs\MonitorTransactionStatus;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\Transaction;
+use App\Services\R4Service;
 use App\Services\StripeService;
 use Exception;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Pages\Actions\Action;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Http;
 
@@ -24,11 +20,11 @@ class SubscriptionPayment extends Page
 {
     protected static string $resource = SubscriptionResource::class;
 
-    protected static string $view = 'filament.pages.user-subscription-payment';
+    protected static string $view = 'filament.pages.subscription-payment';
 
     public function getTitle(): string
     {
-        return 'Primer Pago';
+        return 'Pago de Suscripción';
     }
 
     public Subscription $subscription;
@@ -45,59 +41,30 @@ class SubscriptionPayment extends Page
 
     public $amountInBs;
 
-    public function mount($record): void
+    public function mount(string $record): void
     {
         /** @var Subscription */
         $this->subscription = Subscription::findOrFail($record);
         $this->amount = $this->subscription->service_price_cents / 100;
-        $this->amountInBs = $this->convertToBs($this->amount);
+        $this->amountInBs = $this->getAmountInBs($this->amount);
         $this->otp = null;
-
-        if ($filter = request()->query('success') === '1') {
-            Notification::make()
-                ->title('Pago exitoso')
-                ->body('Tu suscripción se activó correctamente.')
-                ->success()
-                ->send();
-            redirect(SubscriptionResource::getUrl('index'));
-        } elseif ($filter = request()->query('success') === '0') {
-            Notification::make()
-                ->title('Pago cancelado')
-                ->body('No se pudo completar el pago de tu suscripción. Inténtalo nuevamente.')
-                ->danger()
-                ->send();
-        }
     }
 
-    protected function convertToBs($amountInUSD)
+    protected function getAmountInBs(float $amountInUSD): float
     {
         try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'Authorization' => $this->generateBcvToken(),
-                'Commerce' => config('banking.commerce_id'),
-            ])->post(config('banking.tasa_bcv'), [
-                'Moneda' => 'USD',
-                'Fechavalor' => now()->format('Y-m-d'),
-            ]);
+            $rate = R4Service::new()->getBcvRate()['tipocambio'];
 
-            $rate = $response->json()['tipocambio'] ?? null;
+            return round($amountInUSD * $rate, 2);
 
-            // dd($response->json());
-
-            if ($rate) {
-                return round($amountInUSD * $rate, 2);
-            }
-
-            throw new Exception('No se pudo obtener la tasa de cambio.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Notification::make()
                 ->title('Error al obtener la tasa')
                 ->body('No se pudo obtener la tasa de cambio del BCV. Detalles: '.$e->getMessage())
                 ->danger()
                 ->send();
 
-            return null;
+            return 0;
         }
     }
 
@@ -352,128 +319,5 @@ class SubscriptionPayment extends Page
 
         return $response->json();
 
-    }
-
-    protected function getActions(): array
-    {
-        return [
-            Action::make('payInUSD')
-                ->label('Pagar en USD')
-                ->color('success')
-                ->action(function () {
-                    $stripeService = app(StripeService::class); // Inyectar StripeService
-                    $this->createStripeSession($stripeService);
-                }),
-
-            Action::make('payInBolivares')
-                ->label('Pagar en Bolívares')
-                ->modalHeading('Seleccionar una opción')
-                ->modalWidth('lg')
-                ->modalActions([
-                    Action::make('registerAccount')
-                        ->label('Registrar cuenta y enviar')
-                        ->color('gray')
-                        ->form([
-                            Select::make('bank')
-                                ->label('Banco')
-                                ->options(BankEnum::class)
-                                ->required(),
-
-                            Inputs\PhoneNumberInput::make()
-                                ->label('Número de teléfono')
-                                ->required(),
-
-                            Inputs\IdentityPrefixSelect::make()
-                                ->required(),
-
-                            Inputs\IdentityNumberInput::make()
-                                ->required(),
-                        ])
-                        ->action(function (array $data) {
-                            $user = auth()->user();
-
-                            // Verificar si el usuario ya tiene cuentas registradas
-                            $hasAccounts = $user->bankAccounts()->exists();
-
-                            // Registrar la nueva cuenta
-                            $newAccount = $user->bankAccounts()->create([
-                                'bank_code' => $data['bank'],
-                                'phone_number' => $data['phone_number'],
-                                'identity_prefix' => $data['identity_prefix'],
-                                'identity_number' => $data['identity_number'],
-                                'default_account' => ! $hasAccounts,
-                            ]);
-
-                            // Generar OTP para la nueva cuenta
-                            $this->submitBolivaresPayment([
-                                'bank' => $newAccount->bank_code,
-                                'phone' => $newAccount->phone_number,
-                                'identity' => str_replace('-', '', $newAccount->identity_document),
-                            ]);
-                        })
-                        ->hidden(fn () => $this->otp !== null), // Ocultar este botón si el OTP fue generado.
-
-                    // Botón para usar una cuenta existente
-                    Action::make('useExistingAccount')
-                        ->label('Realizar con cuenta existente')
-                        ->color('primary')
-                        ->form([
-                            Select::make('existing_account')
-                                ->label('Seleccionar Cuenta')
-                                ->options(
-                                    auth()->user()->bankAccounts()
-                                        ->get()
-                                        ->mapWithKeys(fn ($account) => [
-                                            $account->id => "{$account->bank_code->getLabel()} | {$account->phone_number} | {$account->identity_document}".
-                                                ($account->default_account ? ' (Predeterminada)' : ''),
-                                        ])
-                                        ->toArray()
-                                )
-                                ->default(
-                                    auth()->user()->bankAccounts()
-                                        ->where('default_account', true)
-                                        ->first()?->id // Seleccionar la cuenta predeterminada como valor inicial
-                                )
-                                ->required(),
-                            TextInput::make('amountInBs')
-                                ->label('Monto en Bolívares')
-                                ->default($this->amountInBs) // Usa default() para establecer el valor inicial
-                                ->disabled(), // Deshabilitar para que sea de solo lectura
-                        ])
-                        ->action(function (array $data) {
-                            $bankAccount = auth()->user()->bankAccounts()->findOrFail($data['existing_account']);
-
-                            $this->submitBolivaresPayment([
-                                'bank' => $bankAccount->bank_code,
-                                'phone' => $bankAccount->phone_number,
-                                'identity' => str_replace('-', '', $bankAccount->identity_document),
-                            ]);
-                        })
-                        ->hidden(fn () => $this->otp !== null), // Ocultar este botón si el OTP fue generado.
-
-                    // Botón para confirmar OTP
-                    Action::make('confirmOtp')
-                        ->label('Confirmar Clave de Seguridad (SMS)')
-                        ->color('info')
-                        ->form([
-                            TextInput::make('otp')
-                                ->label('Clave de Seguridad')
-                                ->required(),
-                        ])
-                        ->action(function (array $data) {
-                            $this->otp = $data['otp']; // Asignar el OTP ingresado por el usuario.
-
-                            // Aquí puedes usar los datos del submitBolivaresPayment:
-                            $this->confirmOtp([
-                                'bank' => $this->bank,
-                                'phone' => $this->phone,
-                                'identity' => $this->identity,
-                                'amount' => $this->amountInBs,
-                                'otp' => $this->otp,
-                            ]);
-                        })
-                        ->visible(fn () => $this->otp !== null), // Mostrar solo si el OTP ha sido generado.
-                ]),
-        ];
     }
 }

@@ -18,7 +18,7 @@ enum SubscriptionStatusEnum: string
 
     case Expired = 'expired';
 
-    case Pending = 'pending'; // Nuevo estado para "incomplete" de Stripe
+    case Pending = 'pending';
 
     public function getLabel(): ?string
     {
@@ -30,7 +30,8 @@ enum SubscriptionStatusEnum: string
             self::Unpaid => 'No pagada',
             self::Cancelled => 'Cancelada',
             self::Expired => 'Expirada',
-            self::Pending => 'Pendiente', // Etiqueta para el nuevo estado
+            self::Pending => 'Pendiente',
+            default => 'Desconocido',
         };
     }
 

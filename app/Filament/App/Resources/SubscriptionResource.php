@@ -70,6 +70,12 @@ class SubscriptionResource extends Resource
                     ->sortable()
                     ->placeholder('No disponible'),
 
+                Tables\Columns\TextColumn::make('store.name')
+                    ->label('Tienda')
+                    ->sortable()
+                    ->searchable()
+                    ->placeholder('No disponible'),
+
                 Tables\Columns\TextColumn::make('service.name')
                     ->label('Servicio')
                     ->sortable()
@@ -83,13 +89,13 @@ class SubscriptionResource extends Resource
                     ->formatStateUsing(fn ($state) => $state?->getLabel())
                     ->color(fn ($record) => $record->status->getColor()),
 
-                Tables\Columns\TextColumn::make('trial_ends_at')
-                    ->label('Fin del Período de Prueba')
+                Tables\Columns\TextColumn::make('expires_at')
+                    ->label('Fecha de Expiración')
                     ->date('d/m/Y', 'America/Caracas')
                     ->placeholder('No disponible'),
 
-                Tables\Columns\TextColumn::make('expires_at')
-                    ->label('Fecha de Expiración')
+                Tables\Columns\TextColumn::make('trial_ends_at')
+                    ->label('Fin del Período de Prueba')
                     ->date('d/m/Y', 'America/Caracas')
                     ->placeholder('No disponible'),
             ])
@@ -99,8 +105,7 @@ class SubscriptionResource extends Resource
                     ->color('success')
                     ->icon('heroicon-o-currency-dollar')
                     ->label('Pagar')
-                    ->button()
-                    ->visible(fn (Subscription $record) => $record->status === 'on_trial'), // Mostrar solo si no hay transacciones
+                    ->button(),
             ]);
 
     }

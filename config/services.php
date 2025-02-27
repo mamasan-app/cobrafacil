@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'r4' => [
+        'base_url' => env('R4_BASE_URL'),
+        'token' => env('R4_TOKEN'),
+        'commerce_id' => env('R4_COMMERCE_ID'),
+    ],
 ];
